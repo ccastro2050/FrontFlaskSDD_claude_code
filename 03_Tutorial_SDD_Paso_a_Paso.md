@@ -56,6 +56,96 @@ Este tutorial esta disenado para personas que:
 | Ingles tecnico basico | Basico | Puedes leer palabras como `install`, `run`, `error`, `success` |
 | Ganas de aprender | Alto | Estas leyendo esto, asi que ya lo tienes |
 
+### Tu nuevo rol: Desarrollador con IA
+
+Antes de empezar, es importante que entiendas algo: en este tutorial **no vas a programar de la forma tradicional**. No vas a escribir cada linea de codigo manualmente. Vas a trabajar como un **Desarrollador con IA** — un rol que la industria llama la ["Clase Supervisora"](https://fortune.com/2026/03/31/fortune-com-2026-03-26-ai-agents-vibe-coding-developer-skills-supervisor-class/).
+
+**Que significa esto en la practica:**
+
+| Lo que hacias antes | Lo que haras ahora |
+|---------------------|--------------------|
+| Memorizar sintaxis de Python, HTML, CSS | Definir especificaciones claras de lo que quieres construir |
+| Escribir cada linea de codigo | Dirigir a la IA con prompts precisos |
+| Debuggear buscando el error tu solo | Revisar lo que la IA genero y decidir si es correcto |
+| Documentar al final (o nunca) | Documentar ANTES de codificar — eso es SDD |
+
+> *"La IA produce volumen. Los humanos aseguran calidad."*
+> — [DEV Community, 2026](https://dev.to/austinwdigital/ai-assisted-development-in-2026-best-practices-real-risks-and-the-new-bar-for-engineers-3fom)
+
+**Las 5 competencias que vas a desarrollar en este tutorial:**
+
+| Competencia | Que significa | En que fase la practicas |
+|-------------|--------------|--------------------------|
+| **Especificacion** | Definir QUE construir con precision | Fase 0 (constitution) y Fase 1 (specify) |
+| **Juicio critico** | Evaluar si lo que genero la IA es correcto | Todas las fases (checklist de revision) |
+| **Revision de codigo** | Leer codigo generado como si fuera de un junior | Fase 7 (implement) |
+| **Arquitectura** | Decidir como se conectan las piezas | Fase 3 (plan) |
+| **Iteracion** | Refinar cuando el resultado no es satisfactorio | Todas las fases |
+
+**Esto NO significa que no necesitas entender el codigo.** Necesitas entenderlo para juzgar si es correcto — pero no necesitas memorizarlo ni escribirlo desde cero. Segun [Gartner (citado por Shift Asia)](https://shiftasia.com/column/ai-in-software-development-the-rise-of-the-ai-augmented-developer/), para finales de 2026 el **75% de los desarrolladores** orquestaran agentes de IA en vez de codificar manualmente.
+
+### Que hacer cuando la IA NO genera lo que esperabas
+
+Esto te va a pasar en CADA fase. La IA no es perfecta. A veces genera documentos incompletos, ignora instrucciones o inventa cosas que no pediste. Cuando eso pase, tienes **3 opciones**:
+
+```mermaid
+graph TB
+    START["El resultado de la IA
+    no es lo que esperabas"]
+    Q1{"Esta mas del 80%
+    bien?"}
+    Q2{"El problema es que
+    TU no fuiste claro
+    o que la IA fallo?"}
+
+    A["OPCION A: Editar manualmente
+    ━━━
+    Abrir el archivo .md y corregir
+    lo que falta o sobra.
+    Rapido. Para errores puntuales."]
+
+    B["OPCION B: Re-ejecutar el comando
+    ━━━
+    Mejorar el prompt y volver a
+    ejecutar /specify, /plan, etc.
+    Para cuando falta mucho."]
+
+    C["OPCION C: Combinar ambos
+    ━━━
+    Editar lo que esta bien
+    (para no perderlo) y re-ejecutar
+    para que la IA complete lo que falta."]
+
+    START --> Q1
+    Q1 -->|"Si, solo faltan
+    detalles"| A
+    Q1 -->|"No, falta
+    mucho"| Q2
+    Q2 -->|"Yo no fui claro"| B
+    Q2 -->|"La IA ignoro
+    lo que pedi"| C
+
+    style A fill:#22c55e,stroke:#16a34a,color:#fff
+    style B fill:#3b82f6,stroke:#1d4ed8,color:#fff
+    style C fill:#f59e0b,stroke:#d97706,color:#fff
+```
+
+**Ejemplos concretos:**
+
+| Situacion | Opcion | Que hacer |
+|-----------|--------|-----------|
+| La constitution dice Flask pero tambien menciona Django | **A** (editar) | Abrir `constitution.md`, borrar la linea de Django, guardar |
+| La spec no menciona facturas ni stored procedures | **B** (re-ejecutar) | Rehacer el prompt de `/specify` agregando toda la seccion de facturas |
+| El plan tiene buena estructura de carpetas pero los servicios estan vacios | **C** (ambos) | Mantener la estructura editada, re-ejecutar `/plan` pidiendo detalle en servicios |
+| El codigo compila pero usa SQLAlchemy (prohibido en la constitution) | **B** (re-ejecutar) | Decirle a la IA: "El codigo viola la constitution. No usar ORM. Corregir" |
+| Al tasks.md le falta 1 tarea para el email service | **A** (editar) | Agregar la tarea manualmente en la posicion correcta del tasks.md |
+
+**La regla de oro:**
+
+> Los documentos SDD son **tuyos**, no de la IA. La IA los genera pero tu eres el dueno. Puedes editarlos, reordenarlos, agregar o quitar lo que quieras. **Nunca aceptes un resultado sin revisarlo.** En cada fase de este tutorial hay una checklist — usala.
+
+> Para mayor detalle sobre estrategias de correccion por fase, consulta la [Seccion 2 del documento 02](02_Comandos_SDD_FrontFlaskSDD.md#2-que-hacer-cuando-el-resultado-no-cumple-las-expectativas).
+
 ### Mapa de competencias: que vas a aprender
 
 ```mermaid
@@ -575,6 +665,15 @@ Busca algo que falte en el spec.md. Ejemplo:
 
 Agrega esos requisitos faltantes al spec.md manualmente. **Esto es lo que hace un analista de requisitos en la vida real.**
 
+#### Si el resultado no cumple tus expectativas
+
+| Problema | Opcion | Que hacer |
+|----------|--------|-----------|
+| Faltan requisitos completos (ej: no menciono facturas) | **B** (re-ejecutar) | Mejorar el prompt agregando las funcionalidades faltantes con mas detalle |
+| Los requisitos son vagos (ej: "gestionar productos") | **A** (editar) | Reemplazar en spec.md por requisitos especificos: "listar en tabla, crear con formulario, editar, eliminar con confirmacion" |
+| La IA invento funcionalidades que no pediste | **A** (editar) | Eliminar los requisitos inventados directamente del spec.md |
+| Los flujos de usuario estan incompletos | **A** (editar) o **B** (ejecutar `/clarify`) | Agregar pasos faltantes manualmente o ejecutar `/clarify` para que la IA pregunte |
+
 ### Competencia adquirida
 
 > **Despues de completar esta fase, ya sabes:**
@@ -642,6 +741,14 @@ Piensa en 3 preguntas que la IA **no hizo** pero deberia haber hecho. Ejemplo:
 3. "Que pasa si la API no esta corriendo cuando el frontend intenta conectarse?"
 
 Respondelas tu mismo y agrega las respuestas al `spec.md`.
+
+#### Si el resultado no cumple tus expectativas
+
+| Problema | Opcion | Que hacer |
+|----------|--------|-----------|
+| La IA hizo preguntas irrelevantes o demasiado obvias | **A** (editar) | Ignorar esas preguntas. Agregar tus propias preguntas y respuestas al spec.md |
+| La IA no pregunto sobre aspectos criticos (seguridad, rendimiento) | **A** (editar) | Agregar las preguntas y respuestas que faltan directamente al spec.md |
+| Las respuestas que la IA integro al spec.md son incorrectas | **A** (editar) | Corregir las respuestas en el spec.md. Tu conoces tu proyecto mejor que la IA |
 
 ### Competencia adquirida
 
@@ -791,6 +898,15 @@ Dibuja en un papel (si, papel fisico) la arquitectura del plan:
 
 Comparalo con el diagrama del plan.md. Son iguales? Falta algo?
 
+#### Si el resultado no cumple tus expectativas
+
+| Problema | Opcion | Que hacer |
+|----------|--------|-----------|
+| La estructura de carpetas no es la que quieres | **A** (editar) | Corregir plan.md con tu estructura. El plan es TU diseno |
+| Sugiere librerias prohibidas (ej: SQLAlchemy, React) | **C** (ambos) | Verificar que la constitution lo prohibe. Editar plan.md y re-ejecutar reforzando: "Respetar estrictamente la constitution" |
+| Los componentes estan listados pero sin detalle | **B** (re-ejecutar) | Agregar al prompt: "Detallar los metodos de cada servicio y los endpoints que consume" |
+| La arquitectura no coincide con la spec | **B** (re-ejecutar) | Algo se perdio entre spec y plan. Re-ejecutar `/plan` verificando que spec.md esta completo |
+
 ### Competencia adquirida
 
 > **Despues de completar esta fase, ya sabes:**
@@ -912,6 +1028,15 @@ Busca un error de dependencia en las tareas generadas. Ejemplo:
 
 Corrige el orden en tasks.md.
 
+#### Si el resultado no cumple tus expectativas
+
+| Problema | Opcion | Que hacer |
+|----------|--------|-----------|
+| El orden de dependencias es incorrecto | **A** (editar) | Reordenar manualmente en tasks.md. Tu conoces las dependencias mejor que la IA |
+| Hay tareas demasiado grandes (ej: "Crear todos los CRUDs") | **A** (editar) | Descomponer en tasks.md: una tarea por Blueprint |
+| Faltan tareas para requisitos de la spec | **B** (ejecutar `/analyze`) | El comando `/analyze` detecta gaps automaticamente. Luego agrega las tareas faltantes |
+| Las tareas no tienen criterios de completitud | **A** (editar) | Agregar a cada tarea una linea "Criterio: como saber que esta terminada" |
+
 ### Competencia adquirida
 
 > **Despues de completar esta fase, ya sabes:**
@@ -978,6 +1103,14 @@ El reporte mostrara:
 
 **Accion:** Corrige cada gap y contradiccion directamente en los archivos correspondientes. Luego re-ejecuta `/analyze` hasta que no haya errores.
 
+#### Si el resultado no cumple tus expectativas
+
+| Problema | Opcion | Que hacer |
+|----------|--------|-----------|
+| El analyze no detecto gaps que tu si ves | **A** (editar) | Corregir los archivos (spec, plan, tasks) manualmente con los gaps que encontraste |
+| El analyze reporta demasiados falsos positivos | **A** (ignorar) | Evaluar cada reporte con criterio. No todo lo que la IA marca como gap es realmente un problema |
+| Despues de corregir, el analyze sigue reportando errores | **B** (re-ejecutar) | Puede ser que los archivos quedaron inconsistentes al editar. Re-ejecutar la fase anterior (ej: `/tasks`) para regenerar |
+
 ### Competencia adquirida
 
 > **Despues de completar esta fase, ya sabes:**
@@ -1042,6 +1175,14 @@ Ejemplo de lo que debe generar:
 #### Ejercicio practico
 
 Marca cuales criterios ya se cumplen en el proyecto existente (FrontFlaskTutorial). Esto te da una idea de cuanto trabajo hay vs cuanto esta hecho.
+
+#### Si el resultado no cumple tus expectativas
+
+| Problema | Opcion | Que hacer |
+|----------|--------|-----------|
+| Los criterios son demasiado genericos (ej: "el login funciona") | **A** (editar) | Reemplazar por criterios especificos: "Al ingresar email y contrasena correctos, redirige a home con flash 'Bienvenido'" |
+| Faltan criterios para modulos completos | **A** (editar) | Agregar los criterios manualmente. Tu sabes que debe hacer cada modulo |
+| La checklist repite criterios de la spec sin agregar valor | **B** (re-ejecutar) | Re-ejecutar pidiendo: "Generar criterios de aceptacion VERIFICABLES, no repetir la spec" |
 
 ### Competencia adquirida
 
@@ -1311,6 +1452,21 @@ graph TB
 7. Guardar — debe crear la factura y redirigir a la lista
 8. Verificar que el total se calculo correctamente (subtotales + total)
 9. Verificar en `/producto` que el stock de PR001 y PR003 se desconto
+
+#### Si el resultado no cumple tus expectativas
+
+El codigo generado es donde MAS vas a necesitar corregir. Recuerda: **trata todo codigo de la IA como codigo de un junior sin revisar.**
+
+| Problema | Opcion | Que hacer |
+|----------|--------|-----------|
+| El codigo no compila / no ejecuta | **Pedir correccion puntual** | Copiar el error exacto y decirle a la IA: "Este error ocurre al ejecutar. Corregir." No re-generar todo el codigo |
+| El codigo funciona pero viola la constitution (ej: usa Django) | **B** (re-ejecutar la tarea) | Senalar la violacion: "El codigo usa Django pero la constitution dice Flask. Regenerar esta tarea" |
+| El codigo es correcto pero demasiado complejo | **Pedir simplificacion** | "Simplificar este metodo. Eliminar abstracciones innecesarias. KISS." |
+| El codigo tiene bugs sutiles (seguridad, logica) | **A** (editar tu mismo) | **Este es TU trabajo.** La IA no detecta sus propios bugs. Revisarlo linea por linea |
+| Una ronda completa salio mal (todos los archivos incorrectos) | **B** (re-ejecutar la ronda) | Descartar los archivos y re-ejecutar la ronda con un prompt mas especifico |
+| El codigo funciona pero no sigue el estilo educativo (sin comentarios) | **Pedir mejora** | "Agregar docstrings y comentarios explicativos en espanol a cada archivo generado" |
+
+> **Importante:** En la fase de implementacion, la correccion se hace **en el codigo**, no en la spec. Esta es la unica fase donde editas codigo directamente (o le pides a la IA que lo corrija). En todas las fases anteriores, la correccion siempre se hace en los documentos (spec, plan, tasks).
 
 ### Competencia adquirida
 
