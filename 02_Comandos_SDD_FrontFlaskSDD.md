@@ -99,6 +99,54 @@ Esto no significa menos trabajo — significa **trabajo diferente**: mas pensami
 
 ## 2. Que hacer cuando el resultado NO cumple las expectativas
 
+### Las 3 opciones que tiene el humano
+
+Cuando ejecutas un comando (`/constitution`, `/specify`, `/plan`, `/tasks`, `/implement`) y el resultado NO es lo que esperabas, tienes **exactamente 3 opciones**:
+
+| # | Opcion | Cuando usarla | Ejemplo |
+|---|--------|---------------|---------|
+| **A** | **Editar manualmente** el archivo generado | El documento esta 80-90% bien. Solo faltan detalles o hay errores puntuales | La spec cubre todo pero le falta 1 requisito de RBAC. Lo agregas tu directamente al `spec.md` |
+| **B** | **Re-ejecutar el comando** con un prompt mejorado | El documento esta menos del 50% bien. La IA no entendio lo que pediste o ignoro partes del prompt | La spec no menciona facturas ni stored procedures. Re-ejecutas `/specify` con un prompt mas detallado |
+| **C** | **Combinar ambos**: editar + re-ejecutar | Partes del documento estan bien (las conservas editando) pero otras necesitan regeneracion | El plan tiene buena arquitectura pero los componentes estan vacios. Editas la arquitectura para fijarla y re-ejecutas `/plan` para que llene los componentes |
+
+**Regla simple para decidir:**
+
+```mermaid
+graph TB
+    START["El resultado no me gusta"]
+    Q1{"Esta mas del 80%
+    bien?"}
+    Q2{"El problema es que
+    la IA no entendio
+    o que yo no fui claro?"}
+
+    A["OPCION A
+    Editar manualmente
+    el archivo generado"]
+    B["OPCION B
+    Re-ejecutar el comando
+    con prompt mejorado"]
+    C["OPCION C
+    Editar lo bueno +
+    re-ejecutar lo malo"]
+
+    START --> Q1
+    Q1 -->|"Si, solo faltan
+    detalles"| A
+    Q1 -->|"No, falta
+    mucho"| Q2
+    Q2 -->|"Yo no fui claro
+    en el prompt"| B
+    Q2 -->|"La IA ignoro
+    lo que pedi"| C
+
+    style A fill:#22c55e,stroke:#16a34a,color:#fff
+    style B fill:#3b82f6,stroke:#1d4ed8,color:#fff
+    style C fill:#f59e0b,stroke:#d97706,color:#fff
+```
+
+> **Importante:** Nunca borres un archivo generado y re-ejecutes a ciegas. Primero lee el resultado, identifica que esta bien y que esta mal, y luego decide si editar, re-ejecutar o ambos. Los documentos SDD son **tuyos** — la IA los genera pero tu eres el dueno y puedes modificarlos libremente.
+
 ### El principio fundamental
 
 > *"Cuando la salida de la IA no es correcta, no empiezas de cero. Retrocedes, mejoras la especificacion, y le pides al agente que regenere."*
