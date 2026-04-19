@@ -9,23 +9,260 @@
 
 ## Tabla de Contenidos
 
-- [1. Objetivo](#1-objetivo)
-- [2. Contexto del Proyecto](#2-contexto-del-proyecto)
-- [3. FASE 0: /constitution](#3-fase-0-constitution)
-- [4. FASE 1: /specify](#4-fase-1-specify)
-- [5. FASE 2: /clarify](#5-fase-2-clarify)
-- [6. FASE 3: /plan](#6-fase-3-plan)
-- [7. FASE 4: /tasks](#7-fase-4-tasks)
-- [8. FASE 5: /analyze](#8-fase-5-analyze)
-- [9. FASE 6: /checklist](#9-fase-6-checklist)
-- [10. FASE 7: /implement](#10-fase-7-implement)
-- [11. Tabla Resumen de Ejecucion](#11-tabla-resumen-de-ejecucion)
-- [12. Protocolo de Comparacion entre IAs](#12-protocolo-de-comparacion-entre-ias)
-- [13. Notas y Tips](#13-notas-y-tips)
+- [1. Que es un Desarrollador con IA](#1-que-es-un-desarrollador-con-ia)
+- [2. Que hacer cuando el resultado NO cumple las expectativas](#2-que-hacer-cuando-el-resultado-no-cumple-las-expectativas)
+- [3. Objetivo](#3-objetivo)
+- [4. Contexto del Proyecto](#4-contexto-del-proyecto)
+- [5. FASE 0: /constitution](#5-fase-0-constitution)
+- [6. FASE 1: /specify](#6-fase-1-specify)
+- [7. FASE 2: /clarify](#7-fase-2-clarify)
+- [8. FASE 3: /plan](#8-fase-3-plan)
+- [9. FASE 4: /tasks](#9-fase-4-tasks)
+- [10. FASE 5: /analyze](#10-fase-5-analyze)
+- [11. FASE 6: /checklist](#11-fase-6-checklist)
+- [12. FASE 7: /implement](#12-fase-7-implement)
+- [13. Tabla Resumen de Ejecucion](#13-tabla-resumen-de-ejecucion)
+- [14. Protocolo de Comparacion entre IAs](#14-protocolo-de-comparacion-entre-ias)
+- [15. Notas y Tips](#15-notas-y-tips)
+- [16. Referencias](#16-referencias)
 
 ---
 
-## 1. Objetivo
+## 1. Que es un Desarrollador con IA
+
+### El nuevo rol: de escribir codigo a supervisar agentes
+
+El rol del desarrollador esta cambiando fundamentalmente. Segun [Fortune (2026)](https://fortune.com/2026/03/31/fortune-com-2026-03-26-ai-agents-vibe-coding-developer-skills-supervisor-class/), estamos ante el surgimiento de la **"Clase Supervisora"** — desarrolladores cuyo valor principal ya no es escribir codigo linea por linea, sino **orquestar agentes de IA, revisar sus resultados y tomar decisiones de diseno**.
+
+> *"La IA produce volumen. Los humanos aseguran calidad."*
+> — [DEV Community, AI-Assisted Development in 2026](https://dev.to/austinwdigital/ai-assisted-development-in-2026-best-practices-real-risks-and-the-new-bar-for-engineers-3fom)
+
+### Antes vs Ahora
+
+```mermaid
+graph LR
+    subgraph Antes["Desarrollador Tradicional"]
+        direction TB
+        AT1["Memorizar sintaxis"]
+        AT2["Escribir cada linea de codigo"]
+        AT3["Debuggear manualmente"]
+        AT4["Documentar al final"]
+    end
+
+    subgraph Ahora["Desarrollador con IA"]
+        direction TB
+        AI1["Definir especificaciones claras"]
+        AI2["Dirigir al agente con prompts precisos"]
+        AI3["Revisar y corregir la salida de la IA"]
+        AI4["Documentar ANTES de codificar (SDD)"]
+    end
+
+    style Antes fill:#94a3b8,stroke:#64748b,color:#fff
+    style Ahora fill:#3b82f6,stroke:#1d4ed8,color:#fff
+```
+
+### Las 5 competencias del Desarrollador con IA
+
+Segun multiples fuentes ([MindStudio](https://www.mindstudio.ai/blog/how-ai-is-changing-what-it-means-to-be-a-developer), [Pragmatic Engineer](https://newsletter.pragmaticengineer.com/p/ai-tooling-2026), [Shift Asia](https://shiftasia.com/column/ai-in-software-development-the-rise-of-the-ai-augmented-developer/)), el desarrollador con IA necesita 5 competencias clave:
+
+| # | Competencia | Que significa | Ejemplo en SDD |
+|---|-------------|--------------|-----------------|
+| 1 | **Especificacion** | Saber definir QUE se quiere construir con precision, eliminando ambiguedad | Escribir el prompt de `/constitution` y `/specify` con el detalle suficiente para que la IA no invente |
+| 2 | **Juicio critico** | Saber evaluar si la salida de la IA es correcta, no solo si "funciona" | Revisar el `spec.md` generado y detectar requisitos faltantes, contradicciones o suposiciones incorrectas |
+| 3 | **Revision de codigo** | Tratar TODO el codigo generado por IA como "codigo de un junior sin revisar" | Leer el codigo de `/implement`, buscar bugs sutiles, problemas de seguridad, complejidad innecesaria |
+| 4 | **Arquitectura** | Entender como se conectan las piezas de un sistema para tomar decisiones de diseno | Decidir que Flask use Blueprints, que el servicio sea generico, que el middleware use `before_request` |
+| 5 | **Iteracion** | Saber refinar los prompts y documentos cuando el resultado no es satisfactorio | Re-ejecutar `/specify` con mas detalle cuando la spec generada omitio el RBAC |
+
+### Que NO es un Desarrollador con IA
+
+| Mito | Realidad |
+|------|----------|
+| "Solo copia/pega lo que dice la IA" | Revisa, cuestiona, corrige y mejora. La IA es el borrador, el humano es el editor |
+| "No necesita saber programar" | Necesita entender el codigo para juzgar si es correcto. No necesita memorizarlo, pero si comprenderlo |
+| "La IA reemplaza al desarrollador" | La IA reemplaza la parte mecanica (escribir sintaxis). El juicio, la arquitectura y la revision son humanos |
+| "Es mas facil que desarrollar sin IA" | Es diferente. Escribir prompts precisos y revisar codigo generado requiere habilidades que antes no existian |
+
+> *"Escribir codigo es barato. Pensar es caro."*
+> — [DEV Community, 2026](https://dev.to/austinwdigital/ai-assisted-development-in-2026-best-practices-real-risks-and-the-new-bar-for-engineers-3fom)
+
+### Gartner: el futuro es orquestar, no codificar
+
+Segun [Gartner (citado por Shift Asia)](https://shiftasia.com/column/ai-in-software-development-the-rise-of-the-ai-augmented-developer/), para finales de 2026:
+
+- **75% de los desarrolladores** orquestaran en vez de codificar
+- **80% de las organizaciones** evolucionaran equipos grandes a equipos pequenos aumentados con IA
+- Los desarrolladores estimaron que la IA asiste en el **42% del codigo** que hacen commit
+
+Esto no significa menos trabajo — significa **trabajo diferente**: mas pensamiento critico, mas revision, mas diseno, menos tipeo.
+
+---
+
+## 2. Que hacer cuando el resultado NO cumple las expectativas
+
+### El principio fundamental
+
+> *"Cuando la salida de la IA no es correcta, no empiezas de cero. Retrocedes, mejoras la especificacion, y le pides al agente que regenere."*
+> — [Hypergen, Spec Driven Development](https://www.hypergen.com.au/blog/spec-driven-development)
+
+En SDD, la correccion siempre se hace **en la especificacion, no en el codigo**. Si el codigo generado es incorrecto, el problema esta en que la spec no fue lo suficientemente clara.
+
+### El ciclo Generar → Evaluar → Refinar → Regenerar
+
+```mermaid
+graph TB
+    GEN["1. GENERAR
+    Ejecutar el comando
+    (/constitution, /specify, /plan, etc.)"]
+    EVAL["2. EVALUAR
+    Revisar el documento generado
+    con la checklist de la fase"]
+    DEC{"3. DECIDIR
+    Cumple con
+    las expectativas?"}
+    OK["4a. ACEPTAR
+    Guardar y pasar
+    a la siguiente fase"]
+    REFINE["4b. REFINAR
+    Identificar que falta,
+    que sobra o que esta mal"]
+    EDIT["5. CORREGIR
+    Editar el prompt,
+    editar el documento,
+    o ambos"]
+    REGEN["6. REGENERAR
+    Re-ejecutar el comando
+    con el prompt mejorado"]
+
+    GEN --> EVAL --> DEC
+    DEC -->|Si| OK
+    DEC -->|No| REFINE
+    REFINE --> EDIT --> REGEN
+    REGEN --> EVAL
+
+    style GEN fill:#3b82f6,stroke:#1d4ed8,color:#fff
+    style EVAL fill:#f59e0b,stroke:#d97706,color:#fff
+    style DEC fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style OK fill:#22c55e,stroke:#16a34a,color:#fff
+    style REFINE fill:#ef4444,stroke:#dc2626,color:#fff
+    style EDIT fill:#ec4899,stroke:#db2777,color:#fff
+    style REGEN fill:#06b6d4,stroke:#0891b2,color:#fff
+```
+
+### Estrategias de correccion por fase
+
+Cada fase tiene formas especificas de corregir cuando el resultado no es satisfactorio:
+
+#### FASE 0: /constitution — El resultado no refleja mis principios
+
+| Problema | Estrategia de correccion |
+|----------|--------------------------|
+| La IA incluyo tecnologias que no pedi (ej: Django en vez de Flask) | **Editar directamente** el `constitution.md` y eliminar/cambiar la tecnologia incorrecta. No es necesario re-ejecutar el comando |
+| Faltan principios que si mencionaste en el prompt | **Agregarlos manualmente** al archivo. La constitution es editable como cualquier Markdown |
+| El documento es demasiado generico, sin los detalles especificos de tu proyecto | **Re-ejecutar** con un prompt mas especifico. Agregar ejemplos concretos: en vez de "usar Bootstrap", decir "usar Bootstrap 5.3 con layout sidebar y tabla responsive" |
+
+#### FASE 1: /specify — La spec no cubre todas las funcionalidades
+
+| Problema | Estrategia de correccion |
+|----------|--------------------------|
+| Faltan requisitos completos (ej: no menciono el RBAC) | **Re-ejecutar `/specify`** agregando al prompt las funcionalidades faltantes con mas detalle |
+| Los requisitos son vagos (ej: "el usuario puede gestionar productos") | **Editar el spec.md** y reemplazar requisitos vagos por especificos: "El usuario puede listar productos en tabla, crear con formulario, editar y eliminar con confirmacion" |
+| La IA invento funcionalidades que no pediste | **Eliminar** los requisitos inventados directamente del spec.md |
+| Los flujos de usuario estan incompletos | **Agregar** los pasos faltantes manualmente o re-ejecutar `/clarify` para que la IA pregunte |
+
+#### FASE 3: /plan — La arquitectura no coincide con lo esperado
+
+| Problema | Estrategia de correccion |
+|----------|--------------------------|
+| La estructura de carpetas es diferente a la que quieres | **Editar el plan.md** con la estructura correcta. El plan es tu diseno, no el de la IA |
+| Sugiere librerias que no quieres (ej: SQLAlchemy) | **Verificar la constitution.md** — si la regla "no ORM" esta ahi y la IA la ignoro, **reforzar** en el prompt: "Respetar estrictamente la constitution.md. No usar ORM bajo ninguna circunstancia" |
+| Los componentes no tienen suficiente detalle | **Re-ejecutar `/plan`** agregando contexto al prompt: "El plan debe detallar los metodos de cada servicio y los endpoints que consume" |
+
+#### FASE 4: /tasks — Las tareas estan desordenadas o faltan
+
+| Problema | Estrategia de correccion |
+|----------|--------------------------|
+| El orden de dependencias es incorrecto | **Reordenar manualmente** en tasks.md. Tu conoces las dependencias mejor que la IA |
+| Hay tareas demasiado grandes (ej: "Crear todos los CRUDs") | **Descomponer** la tarea grande en tareas pequenas: una por Blueprint |
+| Faltan tareas para requisitos de la spec | **Ejecutar `/analyze`** para detectar gaps automaticamente |
+
+#### FASE 7: /implement — El codigo generado tiene errores
+
+| Problema | Estrategia de correccion |
+|----------|--------------------------|
+| El codigo no compila / no ejecuta | **Leer el error**, identificar la causa, y pedirle a la IA que corrija ESE error especifico (no re-generar todo) |
+| El codigo funciona pero no sigue la constitution | **Senalar la violacion** a la IA: "El codigo usa Django pero la constitution dice Flask. Corregir" |
+| El codigo es correcto pero demasiado complejo | **Pedir simplificacion**: "Simplificar este metodo. Eliminar abstracciones innecesarias" |
+| El codigo tiene bugs sutiles (seguridad, logica) | **Este es TU trabajo como Desarrollador con IA.** La IA no detecta sus propios bugs. Tu debes revisarlo como "codigo de junior sin revisar" |
+
+### Las 3 reglas de oro de la iteracion en SDD
+
+```mermaid
+graph LR
+    R1["REGLA 1
+    Corrige la spec,
+    no el codigo
+    ━━━
+    Si el codigo es incorrecto,
+    el problema esta en la spec.
+    Mejora la spec y regenera."]
+
+    R2["REGLA 2
+    Nunca aceptes
+    sin revisar
+    ━━━
+    Cada salida de la IA
+    debe pasar por tu
+    checklist de la fase."]
+
+    R3["REGLA 3
+    Iterar es barato,
+    no iterar es caro
+    ━━━
+    Refinar y regenerar cuesta
+    minutos. Un bug en produccion
+    cuesta horas o dias."]
+
+    style R1 fill:#3b82f6,stroke:#1d4ed8,color:#fff
+    style R2 fill:#f59e0b,stroke:#d97706,color:#fff
+    style R3 fill:#22c55e,stroke:#16a34a,color:#fff
+```
+
+### Ejemplo practico: la spec no incluyo el RBAC
+
+**Situacion:** Ejecutaste `/specify` y el spec.md generado no menciona el control de acceso por roles.
+
+**Paso 1 — Identificar el gap:**
+> "El spec.md tiene requisitos de login pero no dice nada sobre middleware, rutas_permitidas ni roles."
+
+**Paso 2 — Decidir la estrategia:**
+> Opcion A: Editar spec.md manualmente y agregar los requisitos de RBAC.
+> Opcion B: Re-ejecutar `/specify` con un prompt que enfatice el RBAC.
+
+**Paso 3 — Ejecutar la correccion (Opcion B):**
+
+```
+/speckit-specify
+
+(prompt anterior completo) +
+
+IMPORTANTE — REQUISITOS DE RBAC QUE DEBEN INCLUIRSE:
+- Middleware @app.before_request que intercepta CADA request
+- Verifica sesion activa, permisos por ruta, cambio de contrasena forzado
+- Las rutas permitidas se cargan al login via JOIN de 5 tablas
+- El menu de navegacion solo muestra rutas permitidas para el rol del usuario
+- Pagina 403 "Sin acceso" cuando el rol no tiene permiso
+- Rutas publicas exentas: /login, /logout, /static, /recuperar-contrasena
+```
+
+**Paso 4 — Re-evaluar:**
+> Abrir el nuevo spec.md y verificar con la checklist que ahora SI incluye RBAC.
+
+**Paso 5 — Si sigue faltando:**
+> Editarlo manualmente. Tu eres el dueno del spec, no la IA.
+
+---
+
+## 3. Objetivo del documento
 
 Ejecutar las 7 fases de SDD (Spec-Driven Development) con GitHub Spec Kit sobre el proyecto **FrontFlaskSDD**: un frontend web en Flask que consume una API REST generica en C#.
 
@@ -811,3 +1048,29 @@ git add tasks.md && git commit -m "SDD fase 4: tasks"
 ```
 
 Esto permite comparar los artefactos generados por cada IA en branches separados.
+
+---
+
+## 16. Referencias
+
+### Sobre el rol del Desarrollador con IA
+
+- [Fortune - The Supervisor Class: How AI Agents Are Remaking the Developer's Career (2026)](https://fortune.com/2026/03/31/fortune-com-2026-03-26-ai-agents-vibe-coding-developer-skills-supervisor-class/) — Define el concepto de "Clase Supervisora" y como el rol del desarrollador muta de escribir codigo a orquestar agentes
+- [DEV Community - AI-Assisted Development in 2026: Best Practices, Real Risks, and the New Bar for Engineers](https://dev.to/austinwdigital/ai-assisted-development-in-2026-best-practices-real-risks-and-the-new-bar-for-engineers-3fom) — Mejores practicas, riesgos reales y la nueva vara para ingenieros. Fuente de "La IA produce volumen, los humanos aseguran calidad"
+- [MindStudio - How AI Is Changing What It Means to Be a Developer in 2026](https://www.mindstudio.ai/blog/how-ai-is-changing-what-it-means-to-be-a-developer) — Analisis del cambio de competencias del desarrollador moderno
+- [Shift Asia - The Rise of the AI-Augmented Developer](https://shiftasia.com/column/ai-in-software-development-the-rise-of-the-ai-augmented-developer/) — Cita las predicciones de Gartner: 75% de desarrolladores orquestaran en vez de codificar para 2026
+- [Pragmatic Engineer - AI Tooling for Software Engineers in 2026](https://newsletter.pragmaticengineer.com/p/ai-tooling-2026) — Herramientas y flujos de trabajo del ingeniero aumentado con IA
+- [Intetics - The State of AI-Native Software Engineering: 2026 Industry Analysis](https://intetics.com/white-papers/the-state-of-ai-native-software-engineering-2026-industry-analysis/) — Analisis de la industria sobre ingenieria de software nativa de IA
+
+### Sobre iteracion y correccion en SDD
+
+- [Hypergen - The End of Agile? Introducing Spec Driven Development](https://www.hypergen.com.au/blog/spec-driven-development) — Explica el ciclo de bajo costo "refinar spec → regenerar codigo" y por que SDD reduce el retrabajo
+- [GitHub Spec Kit - Issue #1191: Spec-Driven Editing Flow](https://github.com/github/spec-kit/issues/1191) — Discusion oficial sobre como actualizar y refinar specs existentes
+- [Fred Hutch - Spec-Driven Development with spec-kit: A Walkthrough](https://matsen.fredhutch.org/general/2026/02/10/spec-kit-walkthrough.html) — Ejemplo practico paso a paso con iteraciones y correcciones
+- [Martin Fowler / Birgitta Bockeler - Understanding SDD Tools](https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html) — Analisis critico que advierte sobre la necesidad de revisar agresivamente la salida de la IA
+
+### Sobre SDD y GitHub Spec Kit (del documento 01)
+
+- [GitHub Blog - Spec-driven development with AI](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/) — Anuncio oficial del toolkit
+- [GitHub Spec Kit - Repositorio](https://github.com/github/spec-kit) — Codigo fuente y templates
+- [Microsoft for Developers - Diving Into Spec-Driven Development](https://developer.microsoft.com/blog/spec-driven-development-spec-kit) — Perspectiva de Microsoft
