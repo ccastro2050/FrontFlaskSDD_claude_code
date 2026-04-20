@@ -1348,52 +1348,94 @@ FLUJOS DE USUARIO CRÍTICOS:
 - Navegación RBAC → middleware verifica permisos → mostrar/ocultar menú según rol
 ```
 
-### Despues de ejecutar: como revisar el resultado
+### Qué pasa cuando ejecutas el comando
 
-La IA generara un archivo `spec.md`. Este es el documento más importante del proyecto — es el "contrato" de lo que se va a construir.
+Claude Code CLI va a:
+
+1. **Crear una rama de Git** para la feature (ej: `001-sistema-ventas-rbac`). Te pedirá permiso — selecciona `1. Yes`.
+2. **Crear la carpeta de la spec** (`specs/001-sistema-ventas-rbac/`). Te pedirá permiso — selecciona `1. Yes`.
+3. **Trabajar 3-6 minutos** generando la especificación. No toques nada mientras trabaja.
+4. **Pedir permiso para guardar** cada archivo (`spec.md`, `requirements.md`). Selecciona `1. Yes` en cada uno.
+5. **Mostrar un resumen final** con la estructura generada.
+
+> **Nota importante:** Es posible que la IA indique que **no es necesario ejecutar `/speckit-clarify`** (la Fase 2) porque la spec quedó suficientemente clara. Esto es normal cuando el prompt de `/specify` fue lo suficientemente detallado. Si la IA lo sugiere, puedes saltar directamente a `/speckit-plan` (Fase 3).
+
+### Después de ejecutar: cómo revisar el resultado
+
+La IA genera el archivo `specs/001-sistema-ventas-rbac/spec.md`. Este es el documento más importante del proyecto — es el "contrato" de lo que se va a construir. Ábrelo en VS Code y revísalo.
 
 #### Cómo leer spec.md sección por sección
 
-| Sección del spec.md | Que buscar | Pregunta clave |
+| Sección del spec.md | Qué buscar | Pregunta clave |
 |---------------------|-----------|----------------|
-| Descripción del proyecto | Resumen general | Alguien que no conoce el proyecto, lo entendería con está descripción? |
-| Requisitos funcionales | Lista numerada (RF-001, RF-002...) | Cada funcionalidad qué pedimos en el prompt tiene un requisito? |
-| Requisitos no funcionales | Rendimiento, seguridad, usabilidad | Se menciona JWT, BCrypt, RBAC? |
-| Flujos de usuario | Secuencias paso a paso | El flujo de login está completo? El de factura? |
-| Criterios de aceptación | Condiciones de "terminado" | Cada requisito tiene al menos 1 criterio de aceptación? |
+| User Stories | Historias de usuario priorizadas (P1, P2...) | ¿Cada funcionalidad que pedimos tiene una historia? |
+| Acceptance Scenarios | Escenarios Given/When/Then | ¿Cada historia tiene escenarios verificables? |
+| Edge Cases | Casos borde | ¿Qué pasa cuando algo falla? (stock insuficiente, doble anulación, etc.) |
+| Functional Requirements | Lista numerada (FR-001, FR-002...) | ¿Cada funcionalidad tiene al menos un requisito formal? |
+| Key Entities | Entidades con atributos y relaciones | ¿Coincide con nuestro diagrama ER de 12 tablas? |
+| Success Criteria | Criterios medibles (SC-001...) | ¿Se puede verificar objetivamente si se cumplió? |
+| Assumptions | Supuestos documentados | ¿Se referencia la constitution, el manual de marca, la API? |
 
 #### Checklist de revisión
 
-- [ ] Hay al menos 7 requisitos para los CRUDs simples?
-- [ ] Hay requisitos para los 15 stored procedures?
-- [ ] El flujo de login incluye: verificar BCrypt, cargar roles, cargar rutas, guardar en sesión?
-- [ ] El flujo de factura incluye: seleccionar cliente, vendedor, agregar N productos, enviar SP?
-- [ ] Se menciona el middleware RBAC?
-- [ ] Se menciona el menú dinámico?
-- [ ] Se menciona la recuperación de contraseña por email SMTP?
+- [ ] ¿Hay historias de usuario para login/RBAC, facturas, CRUDs, usuarios/permisos y contraseñas?
+- [ ] ¿La factura tiene maestro-detalle con anulación lógica (borrado lógico)?
+- [ ] ¿El borrado físico está restringido solo al admin?
+- [ ] ¿Los 7 CRUDs simples están listados?
+- [ ] ¿Hay requisitos para usuarios con roles vía SPs?
+- [ ] ¿Hay requisitos para permisos ruta-rol?
+- [ ] ¿El RBAC incluye middleware, menú dinámico y fallback?
+- [ ] ¿El login incluye JWT, BCrypt, carga de roles/rutas?
+- [ ] ¿La recuperación de contraseña incluye SMTP y cambio obligatorio?
+- [ ] ¿Hay validación de contraseña (6 chars, mayúscula, número)?
+- [ ] ¿Stock insuficiente rechaza la factura?
+- [ ] ¿Factura anulada no se puede editar ni anular de nuevo?
+- [ ] ¿Se referencia el Manual de Marca Zenith?
+- [ ] ¿Se dice que todo es vía API REST sin acceso directo a BD?
+- [ ] ¿El idioma es español?
+- [ ] ¿Las entidades clave están documentadas con atributos?
+- [ ] ¿Los criterios de éxito son medibles (con números o porcentajes)?
+- [ ] ¿Hay al menos 5 casos borde documentados?
 
-#### Ejercicio practico
+#### Cosas buenas que la IA puede agregar sin que las pidas
 
-Busca algo qué falte en el spec.md. Ejemplo:
+No te sorprendas si la spec incluye cosas que **no pediste explícitamente** pero que son correctas y valiosas. Ejemplos reales:
+
+| Lo que la IA agregó | Por qué es bueno |
+|---------------------|------------------|
+| "El mensaje de login no revela si el correo existe" (FR-002) | Buena práctica de seguridad — evita enumeración de usuarios |
+| "Facturas anuladas visibles por 7 años" (SC-003) | Requisito legal contable que tú no mencionaste |
+| "Menos del 1% de errores genéricos" (SC-010) | Criterio de calidad de UX medible |
+| "Usuario administrador semilla al desplegar" (Assumption 9) | Necesario para que el sistema funcione desde el primer uso |
+| "Contraseña temporal con ventana de 24 horas" (Assumption) | Detalle operativo que tú no especificaste |
+
+Esto pasa porque la IA **leyó la constitution** y aplicó sus principios automáticamente. Si la constitution dice "RBAC" y "borrado lógico", la IA genera requisitos coherentes con esos principios. **Por eso la constitution es tan importante** — guía todo lo que viene después.
+
+> **La spec NO debe incluir detalles de implementación.** Si ves menciones a JWT, Flask, BCrypt, SQL, stored procedures o nombres de archivos Python en el cuerpo de la spec, eso está mal. Los detalles técnicos van en el **plan** (Fase 3), no en la spec. La spec solo dice **qué** hace el sistema, no **cómo** lo hace.
+
+#### Ejercicio práctico
+
+Busca algo que falte en el spec.md. Ejemplo:
 
 - "No menciona que el formulario de crear producto debe validar que el stock sea un número positivo"
-- "No dice que pasa si el usuario intenta crear una factura sin productos"
+- "No dice qué pasa si el usuario intenta crear una factura sin productos"
 
-Agrega esos requisitos faltantes al spec.md manualmente. **Esto es lo que hace un analista de requisitos en la vida real.**
+Si encuentras algo, agrégalo manualmente. Si no encuentras nada, la spec está completa — pasa a la siguiente fase.
 
 #### Si el resultado no cumple tus expectativas
 
-| Problema | Opcion | Que hacer |
+| Problema | Opción | Qué hacer |
 |----------|--------|-----------|
-| Faltan requisitos completos (ej: no menciono facturas) | **B** (re-ejecutar) | Mejorar el prompt agregando las funcionalidades faltantes con más detalle |
-| Los requisitos son vagos (ej: "gestionar productos") | **A** (editar) | Reemplazar en spec.md por requisitos específicos: "listar en tabla, crear con formulario, editar, eliminar con confirmación" |
-| La IA invento funcionalidades que no pediste | **A** (editar) | Eliminar los requisitos inventados directamente del spec.md |
-| Los flujos de usuario están incompletos | **A** (editar) o **B** (ejecutar `/clarify`) | Agregar pasos faltantes manualmente o ejecutar `/clarify` para que la IA pregunte |
+| Faltan requisitos completos (ej: no mencionó facturas) | **B** (re-ejecutar) | Mejorar el prompt agregando las funcionalidades faltantes con más detalle |
+| Los requisitos son vagos (ej: "gestionar productos") | **A** (editar) | Reemplazar en spec.md por requisitos específicos |
+| La IA inventó funcionalidades que no pediste | **A** (editar) | Eliminar los requisitos inventados directamente del spec.md |
+| Los flujos de usuario están incompletos | **A** (editar) o ejecutar `/speckit-clarify` | Agregar pasos faltantes o dejar que la IA pregunte |
+| La spec incluye detalles de implementación (JWT, Flask, SQL) | **A** (editar) | Mover esos detalles a notas aparte. La spec solo dice QUÉ, no CÓMO |
 
 ### Competencia adquirida
 
-> **Despues de completar está fase, ya sabes:**
-> Escribir requisitos de software formales. Sabes la diferencia entre requisito funcional y no funcional. Sabes que es un CRUD, un stored procedure y un flujo de usuario. Esto es lo que hace un **analista de requisitos** o **product owner**.
+> **Después de completar esta fase, ya sabes:**
+> Escribir requisitos de software formales con historias de usuario, escenarios de aceptación, requisitos funcionales, criterios de éxito medibles y casos borde. Sabes que la spec dice **qué** hace el sistema (no cómo). Sabes revisar lo que genera la IA y reconocer cuando agrega valor extra gracias a la constitution. Esto es lo que hace un **analista de requisitos** o **product owner**.
 
 ---
 
