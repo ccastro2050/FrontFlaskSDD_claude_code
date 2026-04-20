@@ -1,4 +1,4 @@
-# FrontFlaskSDD
+# FrontFlaskSDD (Claude Code)
 
 Frontend web del sistema de ventas **Zenith**, implementado en Flask 3 con
 renderizado server-side. Consume la API REST genérica
