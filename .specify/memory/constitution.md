@@ -71,6 +71,7 @@ Todo el código de aplicación **DEBE** usar español para nombres de variables,
 - **Tokens y secretos**: El JWT **NUNCA** debe exponerse en templates ni en logs; `SECRET_KEY`, credenciales SMTP y URL base de la API **DEBEN** cargarse desde variables de entorno, nunca hard-coded.
 - **Borrado lógico**: Para entidades financieras (facturas y similares), la UI **NO DEBE** exponer acciones de borrado físico salvo a roles administradores explícitamente autorizados por la configuración RBAC.
 - **Scripts de BD equivalentes**: La API mantiene 3 scripts de base de datos (`bdfacturas_sqlserver.sql`, `bdfacturas_postgres.sql`, `bdfacturas_mysql_mariadb.sql`) en la carpeta `script_bd/` del repositorio. Los tres **DEBEN** ser funcionalmente equivalentes: mismas tablas, mismos datos semilla, mismos 16 stored procedures (con nombres idénticos), mismos triggers. Cualquier cambio en la estructura de datos o en un SP **DEBE** replicarse en los 3 scripts para mantener la paridad multi-motor.
+- **Transacciones obligatorias en maestro-detalle**: Toda operación que involucre múltiples tablas relacionadas (patrón maestro-detalle) **DEBE** ejecutarse dentro de una transacción vía stored procedure. **NUNCA** insertar maestro y detalle con llamadas CRUD separadas. Si una operación de detalle falla (ej: stock insuficiente), toda la transacción **DEBE** revertirse (ROLLBACK) y el estado de la BD **DEBE** quedar intacto.
 
 ## Flujo de Desarrollo y Calidad
 

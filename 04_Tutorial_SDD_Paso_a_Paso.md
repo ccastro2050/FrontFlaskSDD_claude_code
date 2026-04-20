@@ -1082,20 +1082,54 @@ La IA generó el archivo `.specify/memory/constitution.md`. Ábrelo y verifica c
 | No menciona los colores Zenith | La IA ignoró la sección de identidad visual | **Opción A:** Agregar manualmente los colores y fuentes |
 | Falta algo que sí pediste en el prompt | La IA omitió algún punto | **Opción A:** Agregar manualmente lo que falta. Tú eres el dueño del documento |
 
-#### Ejercicio practico
+#### Ejercicio práctico — Corrección manual de la constitution
 
-Agrega un principio propio a la constitution. Ejemplo:
+En este ejercicio vamos a simular algo que pasa en la vida real: **la IA generó una buena constitution pero olvidó algo importante.**
+
+Revisando la constitution generada, notamos que no menciona nada sobre **transacciones obligatorias en operaciones maestro-detalle**. Esto es un principio inmutable (no es un detalle funcional, es una regla de arquitectura), así que debe estar en la constitution.
+
+**¿Qué hacer?** Según la sección "Si el resultado no cumple tus expectativas", tenemos 3 opciones:
+
+- **Opción A (editar manualmente):** La constitution está más del 95% bien. Solo falta una restricción. No justifica re-generar todo.
+- **Opción B (re-ejecutar el comando):** No. Perderíamos lo que ya generó bien.
+- **Opción C (combinar ambos):** No es necesario. Es solo agregar una línea.
+
+**Decisión: Opción A — editar manualmente.**
+
+Abre el archivo `.specify/memory/constitution.md` en VS Code. Busca la sección `## Restricciones Técnicas y de Seguridad` y agrega esta restricción al final de la lista:
 
 ```
-- Toda página debe tener un titulo descriptivo en la pestana del navegador
+- **Transacciones obligatorias en maestro-detalle**: Toda operación que involucre 
+  múltiples tablas relacionadas (patrón maestro-detalle) **DEBE** ejecutarse dentro 
+  de una transacción vía stored procedure. **NUNCA** insertar maestro y detalle con 
+  llamadas CRUD separadas. Si una operación de detalle falla (ej: stock insuficiente), 
+  toda la transacción **DEBE** revertirse (ROLLBACK) y el estado de la BD **DEBE** 
+  quedar intacto.
 ```
 
-Edita el archivo `constitution.md` directamente y guardalo. Este principio ahora sera respetado por todos los comandos siguientes.
+Guarda el archivo.
+
+> **¿Por qué no re-ejecutar `/speckit-constitution`?** Porque:
+> 1. La constitution ya está bien al 95% — re-generarla arriesga perder lo bueno
+> 2. Editar manualmente es más rápido y preciso
+> 3. **Tú eres el dueño del documento**, no la IA. La IA lo generó, pero tú lo corriges y apruebas
+> 4. La constitution queda así — no se vuelve a generar. Se edita manualmente cuando haga falta
+
+> **Lección importante:** Esto va a pasar en TODAS las fases. La IA nunca genera algo perfecto al 100%. Tu trabajo como Desarrollador con IA es **revisar, detectar lo que falta y corregir**. Eso es lo que te diferencia de alguien que solo copia/pega sin revisar.
+
+Haz commit de la corrección:
+
+```bash
+# En PowerShell (no en Claude Code CLI):
+git add .specify/memory/constitution.md
+git commit -m "docs: agregar restricción de transacciones obligatorias en maestro-detalle (corrección manual)"
+git push origin main
+```
 
 ### Competencia adquirida
 
-> **Despues de completar está fase, ya sabes:**
-> Definir las reglas fundamentales de un proyecto de software — qué tecnologías usar, como organizar el código, qué prácticas seguir. Esto es lo que hace un **arquitecto de software** al inicio de cada proyecto.
+> **Después de completar esta fase, ya sabes:**
+> Definir las reglas fundamentales de un proyecto de software — qué tecnologías usar, cómo organizar el código, qué prácticas seguir. También sabes **revisar y corregir** lo que genera la IA cuando detectas que falta algo. Esto es lo que hace un **arquitecto de software** al inicio de cada proyecto.
 
 ---
 
