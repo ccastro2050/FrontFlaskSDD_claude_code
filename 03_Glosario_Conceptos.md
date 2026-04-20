@@ -785,24 +785,203 @@ def inyectar_sesion():
 
 ### Maestro-Detalle
 
-**Qué es:** Un patrón donde un registro principal (maestro) tiene N registros hijos (detalle).
+**Qué es:** Un patrón donde un registro principal (**maestro**) tiene N registros hijos (**detalle**). El maestro no tiene sentido sin al menos un detalle, y los detalles no existen sin un maestro.
+
+**Analogía:** Una factura de un supermercado. La factura en sí (número, fecha, cliente, total) es el **maestro**. Cada producto que compraste (arroz ×2, leche ×1, pan ×3) son los **detalles**. No puedes tener una factura vacía (sin productos) ni un producto de factura sin factura.
 
 **Ejemplo en nuestro proyecto:**
 
 ```
 Factura #1 (MAESTRO)
+├── Número: 1
+├── Fecha: 2025-12-03
 ├── Cliente: Ana Torres
 ├── Vendedor: Carlos Pérez
-├── Total: $5,000,000
+├── Estado: activa
+├── Total: $5,000,000 (calculado automáticamente por triggers)
 │
-├── Producto: Laptop Lenovo × 2  (DETALLE)
-└── Producto: Mouse HP × 3       (DETALLE)
+├── Producto: Laptop Lenovo (PR001) × 2 = $5,000,000  (DETALLE)
+└── Producto: Mouse HP (PR004) × 3 = $270,000          (DETALLE)
 ```
 
-**Por qué es especial:** No se puede crear con un simple CRUD genérico. Se necesita un stored procedure que:
-1. Cree la factura (maestro)
-2. Cree cada producto (detalle)
-3. Todo dentro de una transacción (si falla uno, se revierte todo)
+**Por qué NO se puede hacer con un CRUD genérico:**
+
+Un CRUD genérico opera sobre **una tabla a la vez**:
+- `POST /api/producto` → crea UN producto
+- `PUT /api/producto/codigo/PR001` → actualiza UN producto
+- `DELETE /api/producto/codigo/PR001` → elimina UN producto
+
+Pero crear una factura requiere operar sobre **dos tablas al mismo tiempo**:
+1. Insertar la factura en la tabla `factura` (maestro)
+2. Insertar cada producto en la tabla `productosporfactura` (detalle)
+3. Si algún producto falla (stock insuficiente), revertir TODO — incluyendo la factura
+
+Esto solo se puede hacer con un **stored procedure** que maneje una **transacción**.
+
+**Los 6 SPs de factura en nuestro proyecto:**
+
+| SP | Qué hace |
+|----|---------|
+| `sp_insertar_factura_y_productosporfactura` | Crea la factura + N productos en una transacción |
+| `sp_consultar_factura_y_productosporfactura` | Consulta una factura con todos sus productos |
+| `sp_listar_facturas_y_productosporfactura` | Lista todas las facturas con sus productos |
+| `sp_actualizar_factura_y_productosporfactura` | Reemplaza los productos de una factura existente |
+| `sp_anular_factura` | Borrado lógico: cambia estado a 'anulada' y restaura stock |
+| `sp_borrar_factura_y_productosporfactura` | Borrado físico (solo admin): elimina la factura de la BD |
+
+**Cómo se integra con la interfaz gráfica (frontend):**
+
+El formulario de crear factura es más complejo que un CRUD simple porque tiene que:
+
+1. **Seleccionar cliente** de un dropdown (datos de la tabla `cliente`)
+2. **Seleccionar vendedor** de un dropdown (datos de la tabla `vendedor`)
+3. **Agregar N productos** dinámicamente (cada uno con código y cantidad)
+4. **Enviar todo** al SP como un JSON array de productos
+
+```mermaid
+graph TB
+    subgraph Formulario["Formulario de Crear Factura (Frontend)"]
+        F1["Dropdown: Seleccionar Cliente"]
+        F2["Dropdown: Seleccionar Vendedor"]
+        F3["Producto 1: [PR001 ▾] Cantidad: [2]"]
+        F4["Producto 2: [PR003 ▾] Cantidad: [5]"]
+        F5["[+ Agregar otro producto]"]
+        F6["[Guardar Factura]"]
+    end
+
+    subgraph API["API REST (C#)"]
+        SP["SP: sp_insertar_factura_y_productosporfactura
+        Recibe: cliente, vendedor, JSON de productos
+        Ejecuta todo en una TRANSACCIÓN"]
+    end
+
+    subgraph BD["Base de Datos"]
+        T1["INSERT factura (maestro)"]
+        T2["INSERT productosporfactura × N (detalles)"]
+        T3["Triggers: calcular subtotales, descontar stock, calcular total"]
+    end
+
+    F6 -->|"ejecutar_sp()"| SP
+    SP -->|"Transacción"| T1
+    T1 --> T2 --> T3
+
+    style Formulario fill:#3b82f6,stroke:#1d4ed8,color:#fff
+    style API fill:#10b981,stroke:#059669,color:#fff
+    style BD fill:#f59e0b,stroke:#d97706,color:#fff
+```
+
+**El flujo completo paso a paso:**
+
+1. El usuario abre `/factura/nueva` en el navegador
+2. El frontend carga las listas de clientes, vendedores y productos desde la API (3 GETs)
+3. El usuario selecciona cliente, vendedor y agrega productos con cantidades
+4. Al presionar "Guardar", el frontend construye un JSON:
+   ```json
+   {
+     "nombreSP": "sp_insertar_factura_y_productosporfactura",
+     "p_fkidcliente": 1,
+     "p_fkidvendedor": 1,
+     "p_productos": "[{\"codigo\":\"PR001\",\"cantidad\":2},{\"codigo\":\"PR003\",\"cantidad\":5}]",
+     "p_resultado": null
+   }
+   ```
+5. Envía ese JSON al endpoint `POST /api/procedimientos/ejecutarsp`
+6. La API ejecuta el SP dentro de una **transacción**
+7. El SP crea la factura, inserta cada producto, los triggers calculan subtotales/totales y descuentan stock
+8. Si algún producto no tiene stock suficiente, la transacción hace **rollback** y nada se guarda
+9. Si todo sale bien, la transacción hace **commit** y retorna el JSON con la factura creada
+
+### Transacción
+
+**Qué es:** Un grupo de operaciones en la base de datos que se ejecutan **todas o ninguna**. Si una operación falla, todas las anteriores se revierten como si nunca hubieran pasado. Esto se llama **atomicidad**.
+
+**Analogía:** Es como una transferencia bancaria. Si transfieres $100 de cuenta A a cuenta B, los pasos son:
+1. Restar $100 de la cuenta A
+2. Sumar $100 a la cuenta B
+
+Si el paso 2 falla (por ejemplo, el sistema se cae), el paso 1 **se revierte**. Los $100 vuelven a la cuenta A. No se pierden.
+
+**Sin transacción (peligroso):**
+
+```mermaid
+graph TB
+    subgraph SinTx["SIN transacción — PELIGRO"]
+        S1["1. INSERT factura #5 ✅"]
+        S2["2. INSERT producto PR001 ✅"]
+        S3["3. INSERT producto PR003 ❌
+        ERROR: stock insuficiente"]
+        S4["Resultado: Factura #5 existe
+        con solo 1 producto.
+        Datos INCONSISTENTES"]
+    end
+
+    S1 --> S2 --> S3 --> S4
+
+    style S3 fill:#ef4444,stroke:#dc2626,color:#fff
+    style S4 fill:#ef4444,stroke:#dc2626,color:#fff
+```
+
+**Con transacción (seguro):**
+
+```mermaid
+graph TB
+    subgraph ConTx["CON transacción — SEGURO"]
+        C0["BEGIN TRANSACTION"]
+        C1["1. INSERT factura #5 ✅"]
+        C2["2. INSERT producto PR001 ✅"]
+        C3["3. INSERT producto PR003 ❌
+        ERROR: stock insuficiente"]
+        C4["ROLLBACK — se revierte TODO"]
+        C5["Resultado: Factura #5 NO existe.
+        PR001 NO se descontó.
+        Datos CONSISTENTES"]
+    end
+
+    C0 --> C1 --> C2 --> C3 --> C4 --> C5
+
+    style C3 fill:#ef4444,stroke:#dc2626,color:#fff
+    style C4 fill:#f59e0b,stroke:#d97706,color:#fff
+    style C5 fill:#22c55e,stroke:#16a34a,color:#fff
+```
+
+**Cómo se implementa en un stored procedure:**
+
+```sql
+-- Ejemplo simplificado del SP de crear factura
+BEGIN TRANSACTION;          -- Empezar la transacción
+
+INSERT INTO factura (fkidcliente, fkidvendedor, total)
+VALUES (1, 1, 0);           -- Crear la factura (maestro)
+
+INSERT INTO productosporfactura (fknumfactura, fkcodproducto, cantidad)
+VALUES (5, 'PR001', 2);     -- Agregar producto 1 (detalle)
+
+INSERT INTO productosporfactura (fknumfactura, fkcodproducto, cantidad)
+VALUES (5, 'PR003', 5);     -- Agregar producto 2 (detalle)
+-- Si este INSERT falla (stock insuficiente), se ejecuta ROLLBACK
+
+COMMIT TRANSACTION;         -- Si todo salió bien, guardar todo
+-- Si algo falló, ROLLBACK revierte todo
+```
+
+**Transacciones en cada motor de BD:**
+
+| Motor | ¿Es transaccional por defecto? | Detalle |
+|-------|:------------------------------:|---------|
+| **PostgreSQL** | Sí | Todas las operaciones están dentro de una transacción implícita. Es transaccional por naturaleza — si algo falla, nada se guarda automáticamente |
+| **SQL Server** | No por defecto | Hay que usar `BEGIN TRANSACTION` / `COMMIT` / `ROLLBACK` explícitamente (como en nuestros SPs) |
+| **MySQL/MariaDB** | Depende del motor de tabla | Con InnoDB (que es el que usamos) sí soporta transacciones. Con MyISAM no |
+
+> **PostgreSQL y las transacciones:** PostgreSQL es el motor más seguro en este aspecto porque TODA consulta se ejecuta dentro de una transacción implícita. Si ejecutas un INSERT y falla a mitad de camino, no se guarda nada. En SQL Server y MySQL hay que ser explícito con `BEGIN TRANSACTION`. Por eso nuestros SPs tienen `BEGIN TRY / BEGIN TRANSACTION / COMMIT / ROLLBACK` en SQL Server y `BEGIN ... EXCEPTION / ROLLBACK` en PostgreSQL (aunque en PostgreSQL el ROLLBACK es automático si hay error dentro de un procedimiento).
+
+**Por qué son críticas para maestro-detalle:**
+
+Sin transacciones, podrías terminar con:
+- Facturas sin productos (maestro sin detalle)
+- Productos descontados de stock pero sin factura
+- Totales que no cuadran con los productos
+
+Las transacciones garantizan que el estado de la BD sea **siempre consistente**, sin importar si hay errores, caídas del sistema o fallas de red.
 
 ---
 

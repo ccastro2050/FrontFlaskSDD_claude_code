@@ -1157,6 +1157,48 @@ En nuestro proyecto hay **7 CRUDs simples** (producto, persona, empresa, cliente
 
 Si alguno de estos pasos falla (por ejemplo, no hay stock suficiente), **todos** deben revertirse. Esto se llama **transacción** y los stored procedures lo manejan automáticamente.
 
+#### Qué es el patrón maestro-detalle
+
+**Analogía:** Piensa en una factura de papel. La factura tiene un encabezado (número, fecha, cliente) y abajo una tabla con los productos comprados. El encabezado es el **maestro** y cada fila de productos es un **detalle**. No existe una factura sin productos, ni productos de factura sin factura.
+
+```
+┌────────────────────────────────────────┐
+│  FACTURA #1 (MAESTRO)                  │
+│  Fecha: 2025-12-03                     │
+│  Cliente: Ana Torres                   │
+│  Vendedor: Carlos Pérez               │
+├────────────────────────────────────────┤
+│  Producto          Cant.   Subtotal    │
+│  ──────────────────────────────────    │
+│  Laptop Lenovo     × 2    $5,000,000  │  ← DETALLE 1
+│  Mouse HP          × 3    $  270,000  │  ← DETALLE 2
+├────────────────────────────────────────┤
+│  TOTAL:                   $5,270,000  │  ← Calculado por trigger
+└────────────────────────────────────────┘
+```
+
+**Por qué no funciona con un CRUD genérico:** El CRUD genérico opera sobre **una tabla a la vez**. Pero crear una factura necesita insertar en **dos tablas** (`factura` + `productosporfactura`) dentro de una **transacción**. Si insertas la factura pero falla un producto, la factura queda huérfana. Por eso se usan stored procedures.
+
+**La interfaz gráfica integra todo:** El formulario de crear factura no es un formulario simple con campos fijos. Tiene:
+- Dropdown de clientes (datos de la API)
+- Dropdown de vendedores (datos de la API)
+- Una sección dinámica para agregar N productos con su cantidad
+- Un botón "Guardar" que empaqueta todo en un JSON y llama al SP
+
+> **Para más detalle:** Consulta la sección "Maestro-Detalle" y "Transacción" en el [Glosario de Conceptos (03)](03_Glosario_Conceptos.md#maestro-detalle), donde está el diagrama completo del flujo frontend → API → SP → BD con transacción.
+
+#### Qué es una transacción (y por qué es crítica para facturas)
+
+**Analogía:** Es como una transferencia bancaria. Si transfieres $100 de cuenta A a cuenta B, los pasos son: 1) restar $100 de A, 2) sumar $100 a B. Si el paso 2 falla, el paso 1 se revierte — los $100 vuelven a la cuenta A.
+
+**En facturas:** Si al insertar el tercer producto de una factura el stock es insuficiente, la transacción revierte TODO: la factura, los dos productos anteriores y los descuentos de stock. Como si nada hubiera pasado.
+
+**Sin transacción = datos inconsistentes:** Facturas sin productos, stock descontado pero sin factura, totales que no cuadran.
+
+**Con transacción = datos siempre consistentes:** Todo se guarda o nada se guarda.
+
+> **Dato importante:** PostgreSQL es transaccional por naturaleza — toda operación está dentro de una transacción implícita. Si algo falla, nada se guarda automáticamente. En SQL Server y MySQL/MariaDB hay que usar `BEGIN TRANSACTION / COMMIT / ROLLBACK` explícitamente (que es lo que hacen nuestros stored procedures).
+
 #### Qué es un flujo de usuario
 
 Es la secuencia de pasos qué sigue un usuario para completar una tarea. Ejemplo del login:
