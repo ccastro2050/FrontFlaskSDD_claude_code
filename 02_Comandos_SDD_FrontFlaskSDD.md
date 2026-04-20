@@ -585,6 +585,18 @@ PRINCIPIOS DE SEGURIDAD:
 - Recuperación de contraseña vía SMTP (Gmail) con contraseña temporal
 - Las facturas NO se borran físicamente. Se anulan (borrado lógico con campo estado: 'activa'/'anulada'). El borrado físico (DELETE) solo lo puede hacer el administrador
 
+PRINCIPIOS DE IDENTIDAD VISUAL (ver Manual_de_Marca_Zenith.md):
+- Color primario: Azul Zenith #0A2647 (sidebar, encabezados de tabla, fondo login)
+- Color secundario: Dorado Zenith #E8AA2E (botones primarios, hover del menú, links activos, focus de inputs)
+- Color de acento: Azul Medio #144272 (hover sidebar, bordes activos)
+- Tipografía principal: Inter (Google Fonts) para títulos y cuerpo
+- Tipografía monoespaciada: JetBrains Mono para códigos de producto, números de factura y precios
+- Todas las variables de color, tipografía, bordes y sombras deben estar en CSS custom properties (:root) en app.css
+- NO usar los colores por defecto de Bootstrap. Sobrescribirlos con las variables de la marca Zenith
+- Iconos: Bootstrap Icons (bi bi-*). Cada módulo del menú tiene su icono asignado en el manual de marca
+- Alertas/flash messages: borde izquierdo de 4px con color de estado (verde éxito, rojo error, ámbar advertencia, azul info)
+- Login: fondo gradiente azul oscuro (#0A2647 → #144272), tarjeta blanca centrada, botón dorado 100% ancho
+
 PRINCIPIOS DE CÓDIGO:
 - Archivos en español (nombres de variables, comentarios, mensajes flash)
 - snake_case para variables y funciones Python
