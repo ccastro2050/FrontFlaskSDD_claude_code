@@ -45,12 +45,20 @@ def listar():
 @factura_bp.route("/facturas/<int:pk>")
 def detalle(pk):
     try:
-        item = current_app.api.ejecutar_sp(
-            "sp_consultar_factura_y_productosporfactura", {"id": pk}
+        datos = current_app.api.ejecutar_sp(
+            "sp_consultar_factura_y_productosporfactura", {"p_numero": pk}
         ) or {}
     except ApiError as exc:
         flash(f"No se pudo cargar el detalle: {exc.mensaje}", "danger")
         return redirect(url_for("factura.listar"))
+    # El SP retorna {"factura": {...}, "productos": [...]}
+    # Desempacar para que el template acceda a item.total, item.productos, etc.
+    item = {}
+    if isinstance(datos, dict):
+        factura = datos.get("factura", datos)
+        if isinstance(factura, dict):
+            item = factura
+        item["productos"] = datos.get("productos", [])
     return render_template("pages/factura/detalle.html", item=item, es_admin=_es_admin())
 
 
@@ -89,9 +97,11 @@ def nueva():
                                editar=False), 400
 
     try:
+        import json as json_mod
+        productos_json = json_mod.dumps([{"codigo": l["fkcodproducto"], "cantidad": l["cantidad"]} for l in lineas])
         resultado = current_app.api.ejecutar_sp(
             "sp_insertar_factura_y_productosporfactura",
-            {"fkidcliente": fkidcliente, "fkidvendedor": fkidvendedor, "productos": lineas},
+            {"p_fkidcliente": fkidcliente, "p_fkidvendedor": fkidvendedor, "p_productos": productos_json},
         )
         flash(f"Factura creada correctamente (ID {resultado.get('id') if isinstance(resultado, dict) else ''}).", "success")
         return redirect(url_for("factura.listar"))
@@ -117,9 +127,16 @@ def editar(pk):
 
     if request.method == "GET":
         try:
-            item = current_app.api.ejecutar_sp(
-                "sp_consultar_factura_y_productosporfactura", {"id": pk}
+            datos = current_app.api.ejecutar_sp(
+                "sp_consultar_factura_y_productosporfactura", {"p_numero": pk}
             ) or {}
+            # Desempacar {"factura": {...}, "productos": [...]}
+            item = {}
+            if isinstance(datos, dict):
+                factura = datos.get("factura", datos)
+                if isinstance(factura, dict):
+                    item = factura
+                item["productos"] = datos.get("productos", [])
         except ApiError as exc:
             flash(f"No se pudo cargar: {exc.mensaje}", "danger")
             return redirect(url_for("factura.listar"))
@@ -135,9 +152,11 @@ def editar(pk):
     lineas = _leer_lineas(request)
 
     try:
+        import json as json_mod
+        productos_json = json_mod.dumps([{"codigo": l["fkcodproducto"], "cantidad": l["cantidad"]} for l in lineas])
         current_app.api.ejecutar_sp(
             "sp_actualizar_factura_y_productosporfactura",
-            {"id": pk, "fkidcliente": fkidcliente, "fkidvendedor": fkidvendedor, "productos": lineas},
+            {"p_numero": pk, "p_fkidcliente": fkidcliente, "p_fkidvendedor": fkidvendedor, "p_productos": productos_json},
         )
         flash("Factura actualizada.", "success")
         return redirect(url_for("factura.listar"))
@@ -154,7 +173,7 @@ def editar(pk):
 def anular(pk):
     """Borrado lógico — cambia estado a 'anulada' y restaura stock."""
     try:
-        current_app.api.ejecutar_sp("sp_anular_factura", {"id": pk})
+        current_app.api.ejecutar_sp("sp_anular_factura", {"p_numero": pk})
         flash("Factura anulada. El stock se ha restaurado.", "success")
     except ApiError as exc:
         if exc.status_code == 400:
@@ -176,7 +195,7 @@ def eliminar(pk):
     if not _es_admin():
         abort(403)
     try:
-        current_app.api.ejecutar_sp("sp_borrar_factura_y_productosporfactura", {"id": pk})
+        current_app.api.ejecutar_sp("sp_borrar_factura_y_productosporfactura", {"p_numero": pk})
         flash("Factura eliminada físicamente.", "success")
     except ApiError as exc:
         flash(f"No se pudo eliminar: {exc.mensaje}", "danger")

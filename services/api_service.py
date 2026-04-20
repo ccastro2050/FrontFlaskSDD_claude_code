@@ -219,8 +219,25 @@ class ApiService:
     # ---------------------------- Stored Procedures --------------------
 
     def ejecutar_sp(self, nombre: str, parametros: dict[str, Any] | None = None) -> Any:
-        """POST /api/procedimientos/ejecutarsp — ejecuta un SP por nombre."""
-        cuerpo = {"nombre": nombre, "parametros": parametros or {}}
+        """POST /api/procedimientos/ejecutarsp — ejecuta un SP por nombre.
+
+        La API espera un JSON plano con ``nombreSP`` y los parámetros al mismo
+        nivel (no anidados). Ejemplo::
+
+            {"nombreSP": "sp_listar_facturas_y_productosporfactura", "p_resultado": null}
+
+        Los SPs con parámetro OUTPUT ``p_resultado`` retornan el resultado en
+        ese campo. Este método extrae el JSON de ``p_resultado`` automáticamente.
+        """
+        import json as json_mod
+
+        cuerpo: dict[str, Any] = {"nombreSP": nombre}
+        if parametros:
+            cuerpo.update(parametros)
+        # Asegurar que p_resultado esté presente para SPs que lo requieren
+        if "p_resultado" not in cuerpo:
+            cuerpo["p_resultado"] = None
+
         resp = requests.post(
             self._url("/api/procedimientos/ejecutarsp"),
             json=cuerpo,
@@ -228,7 +245,27 @@ class ApiService:
             timeout=self.timeout,
         )
         datos = self._manejar_respuesta(resp)
-        # Respuestas del wrapper: {"datos": [...], ...}
+
+        # La API retorna {"resultados": [...], "total": N, ...}
+        resultados = None
+        if isinstance(datos, dict):
+            resultados = datos.get("resultados") or datos.get("Resultados")
+
+        if resultados and isinstance(resultados, list) and len(resultados) > 0:
+            # Buscar p_resultado o @p_resultado en la primera fila
+            fila = resultados[0]
+            p_resultado = fila.get("p_resultado") or fila.get("@p_resultado")
+            if p_resultado is not None:
+                if isinstance(p_resultado, str):
+                    try:
+                        return json_mod.loads(p_resultado)
+                    except (json_mod.JSONDecodeError, ValueError):
+                        return p_resultado
+                return p_resultado
+
+        # Fallback: devolver resultados o datos crudos
+        if resultados is not None:
+            return resultados
         if isinstance(datos, dict) and "datos" in datos:
             return datos["datos"]
         return datos
