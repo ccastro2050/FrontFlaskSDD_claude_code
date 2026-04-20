@@ -1,0 +1,32 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nuevo' }} vendedor — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h4 class="mb-0"><i class="bi bi-person-workspace"></i> {{ 'Editar' if editar else 'Nuevo' }} vendedor</h4></div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Persona <span class="text-danger">*</span></label>
+                <select name="fkcodpersona" class="form-select" required>
+                    <option value="">— Selecciona una persona —</option>
+                    {% for p in personas %}
+                    <option value="{{ p.codigo }}" {% if item.fkcodpersona == p.codigo %}selected{% endif %}>
+                        {{ p.nombre }} ({{ p.codigo }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Carnet <span class="text-danger">*</span></label>
+                <input type="text" name="carnet" class="form-control font-mono" value="{{ item.carnet or '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Dirección</label>
+                <input type="text" name="direccion" class="form-control" value="{{ item.direccion or '' }}">
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+            <a href="{{ url_for('vendedor.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% if forzoso %}
+    {% extends 'layout/login_layout.html' %}
+{% else %}
+    {% extends 'layout/base.html' %}
+{% endif %}
+{% block title %}Cambiar contraseña — Zenith{% endblock %}
+{% block content %}
+{% if forzoso %}
+    <h1><i class="bi bi-key-fill text-warning"></i> Cambio requerido</h1>
+    <p class="subtitulo">Debes establecer una nueva contraseña antes de continuar.</p>
+{% else %}
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="bi bi-key"></i> Cambiar contraseña</h4>
+        </div>
+        <div class="card-body">
+{% endif %}
+
+<form method="POST" action="{{ url_for('auth.cambiar_contrasena') }}" novalidate>
+    <div class="mb-3">
+        <label for="contrasena_actual" class="form-label">Contraseña actual</label>
+        <input type="password" id="contrasena_actual" name="contrasena_actual"
+               class="form-control" required autocomplete="current-password">
+    </div>
+    <div class="mb-3">
+        <label for="contrasena_nueva" class="form-label">Nueva contraseña</label>
+        <input type="password" id="contrasena_nueva" name="contrasena_nueva"
+               class="form-control" required autocomplete="new-password"
+               minlength="6">
+        <div class="form-text">Mínimo 6 caracteres, con al menos una mayúscula y un dígito.</div>
+    </div>
+    <div class="mb-3">
+        <label for="confirmar_nueva" class="form-label">Confirmar nueva contraseña</label>
+        <input type="password" id="confirmar_nueva" name="confirmar_nueva"
+               class="form-control" required autocomplete="new-password"
+               minlength="6">
+    </div>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-circle"></i> Guardar
+    </button>
+</form>
+
+{% if not forzoso %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

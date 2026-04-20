@@ -1,0 +1,52 @@
+{#
+  templates/components/form_campo.html — macro de campo de formulario.
+
+  Params:
+    - nombre: name del input
+    - etiqueta: label visible
+    - tipo: 'text', 'email', 'password', 'number', 'textarea', 'select'
+    - valor: valor por defecto
+    - requerido: bool
+    - opciones: para 'select', lista de (valor, etiqueta)
+    - ayuda: texto de ayuda bajo el input
+    - error: mensaje de error específico
+    - attrs: dict de atributos extra (min, max, step, etc.)
+#}
+
+{% macro campo(nombre, etiqueta, tipo='text', valor='', requerido=false, opciones=none, ayuda=none, error=none, attrs=none) %}
+    {% set attrs_html = '' %}
+    {% if attrs %}
+        {% for k, v in attrs.items() %}
+            {% set attrs_html = attrs_html + ' ' + k + '="' + v|string + '"' %}
+        {% endfor %}
+    {% endif %}
+
+    <div class="mb-3">
+        <label for="{{ nombre }}" class="form-label">
+            {{ etiqueta }}{% if requerido %} <span class="text-danger">*</span>{% endif %}
+        </label>
+        {% if tipo == 'textarea' %}
+            <textarea id="{{ nombre }}" name="{{ nombre }}"
+                      class="form-control {% if error %}is-invalid{% endif %}"
+                      {% if requerido %}required{% endif %}>{{ valor or '' }}</textarea>
+        {% elif tipo == 'select' %}
+            <select id="{{ nombre }}" name="{{ nombre }}"
+                    class="form-select {% if error %}is-invalid{% endif %}"
+                    {% if requerido %}required{% endif %}>
+                <option value="">— Selecciona —</option>
+                {% for op in opciones or [] %}
+                    <option value="{{ op[0] }}" {% if (valor|string) == (op[0]|string) %}selected{% endif %}>
+                        {{ op[1] }}
+                    </option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <input id="{{ nombre }}" name="{{ nombre }}" type="{{ tipo }}"
+                   value="{{ valor if valor is not none else '' }}"
+                   class="form-control {% if error %}is-invalid{% endif %}"
+                   {% if requerido %}required{% endif %}{{ attrs_html|safe }}>
+        {% endif %}
+        {% if ayuda %}<div class="form-text">{{ ayuda }}</div>{% endif %}
+        {% if error %}<div class="invalid-feedback">{{ error }}</div>{% endif %}
+    </div>
+{% endmacro %}

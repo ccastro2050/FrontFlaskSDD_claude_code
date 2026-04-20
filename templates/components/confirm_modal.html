@@ -1,0 +1,33 @@
+{#
+  templates/components/confirm_modal.html — macro de modal de confirmación.
+
+  Uso:
+    {% from 'components/confirm_modal.html' import confirm_modal %}
+    {{ confirm_modal(id='modalAnular', titulo='Anular factura',
+                     mensaje='¿Anular esta factura?',
+                     action_url='/facturas/anular/5', boton='Anular',
+                     clase_boton='btn-warning') }}
+
+  El modal se dispara con un botón que tenga:
+     data-bs-toggle="modal" data-bs-target="#modalAnular"
+#}
+
+{% macro confirm_modal(id, titulo, mensaje, action_url, boton='Confirmar', clase_boton='btn-danger', metodo='POST') %}
+<div class="modal fade" id="{{ id }}" tabindex="-1" aria-labelledby="{{ id }}-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="{{ id }}-label">{{ titulo }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">{{ mensaje }}</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="{{ metodo }}" action="{{ action_url }}" class="d-inline">
+                    <button type="submit" class="btn {{ clase_boton }}">{{ boton }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

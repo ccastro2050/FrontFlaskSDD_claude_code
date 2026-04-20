@@ -1,0 +1,82 @@
+{% extends 'layout/base.html' %}
+{% block title %}Facturas — Zenith{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-receipt"></i> Facturas</h1>
+    <a href="{{ url_for('factura.nueva') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nueva factura
+    </a>
+</div>
+
+{% if items %}
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Vendedor</th>
+            <th class="text-end">Total</th>
+            <th class="text-center">Estado</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in items %}
+        <tr>
+            <td class="numero-factura">{{ f.numero }}</td>
+            <td>{{ f.fecha or '' }}</td>
+            <td>
+                {% if f.cliente is mapping %}
+                    {{ f.cliente.nombre or f.cliente.fkcodpersona or f.cliente.id }}
+                {% else %}
+                    {{ f.cliente or f.fkid_cliente }}
+                {% endif %}
+            </td>
+            <td>
+                {% if f.vendedor is mapping %}
+                    {{ f.vendedor.nombre or f.vendedor.carnet or f.vendedor.id }}
+                {% else %}
+                    {{ f.vendedor or f.fkid_vendedor }}
+                {% endif %}
+            </td>
+            <td class="text-end precio">${{ '%.2f'|format(f.total|float) if f.total is not none else '0.00' }}</td>
+            <td class="text-center">
+                {% if f.estado == 'anulada' %}
+                    <span class="estado-anulada">anulada</span>
+                {% else %}
+                    <span class="estado-activa">activa</span>
+                {% endif %}
+            </td>
+            <td class="text-end">
+                <a href="{{ url_for('factura.detalle', pk=f.numero) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-eye"></i>
+                </a>
+                {% if f.estado != 'anulada' %}
+                    <a href="{{ url_for('factura.editar', pk=f.numero) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('factura.anular', pk=f.numero) }}"
+                          class="d-inline" onsubmit="return confirm('¿Anular la factura {{ f.numero }}? El stock se restaurará.');">
+                        <button class="btn btn-sm btn-outline-warning">
+                            <i class="bi bi-x-octagon"></i> Anular
+                        </button>
+                    </form>
+                {% endif %}
+                {% if es_admin %}
+                    <form method="POST" action="{{ url_for('factura.eliminar', pk=f.numero) }}"
+                          class="d-inline" onsubmit="return confirm('¡ATENCIÓN! ¿Borrar FÍSICAMENTE la factura {{ f.numero }}? Esto es irreversible.');">
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> No hay facturas registradas.</div>
+{% endif %}
+{% endblock %}

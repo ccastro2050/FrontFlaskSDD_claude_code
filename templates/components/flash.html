@@ -1,0 +1,37 @@
+{#
+  templates/components/flash.html — macro para renderizar mensajes flash.
+
+  Cada categoría tiene su clase Bootstrap (alert-*) y la CSS Zenith le añade
+  un borde izquierdo de 4px del color correspondiente (Principio IV).
+
+  Categorías soportadas:
+  - success (verde)
+  - danger / error (rojo)
+  - warning (ámbar)
+  - info (azul)
+#}
+
+{% macro render_flashes() %}
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+            <div class="flash-container">
+                {% for categoria, mensaje in mensajes %}
+                    {% set clase = 'info' %}
+                    {% if categoria == 'success' %}{% set clase = 'success' %}
+                    {% elif categoria in ['error', 'danger'] %}{% set clase = 'danger' %}
+                    {% elif categoria == 'warning' %}{% set clase = 'warning' %}
+                    {% endif %}
+                    <div class="alert alert-{{ clase }} alert-dismissible fade show" role="alert">
+                        {% if clase == 'success' %}<i class="bi bi-check-circle"></i>
+                        {% elif clase == 'danger' %}<i class="bi bi-x-circle"></i>
+                        {% elif clase == 'warning' %}<i class="bi bi-exclamation-triangle"></i>
+                        {% else %}<i class="bi bi-info-circle"></i>
+                        {% endif %}
+                        {{ mensaje }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endmacro %}

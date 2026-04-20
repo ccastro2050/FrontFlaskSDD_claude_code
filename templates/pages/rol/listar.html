@@ -1,0 +1,31 @@
+{% extends 'layout/base.html' %}
+{% block title %}Roles — Zenith{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-people"></i> Roles</h1>
+    <a href="{{ url_for('rol.nuevo') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nuevo rol</a>
+</div>
+
+{% if items %}
+<table class="table table-hover align-middle">
+    <thead><tr><th>#</th><th>Nombre</th><th class="text-end">Acciones</th></tr></thead>
+    <tbody>
+        {% for r in items %}
+        <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.nombre }}</td>
+            <td class="text-end">
+                <a href="{{ url_for('rol.editar', pk=r.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                <form method="POST" action="{{ url_for('rol.eliminar', pk=r.id) }}"
+                      class="d-inline" onsubmit="return confirm('¿Eliminar el rol {{ r.nombre }}?');">
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> No hay roles registrados.</div>
+{% endif %}
+{% endblock %}

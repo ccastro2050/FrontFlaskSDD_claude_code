@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "integration: tests de integración real contra la API (requiere API_BASE_URL_TESTS activo)",
+    "performance: tests de rendimiento SC-002 / SC-004 (exclusibles con 'pytest -m \"not performance\"')",
+]

@@ -1,0 +1,64 @@
+{#
+  templates/components/tabla_crud.html — macro de tabla CRUD genérica.
+
+  Recibe:
+    - columnas: lista de dicts {clave: str, etiqueta: str, clase_td?: str}
+    - filas: lista de dicts (cada uno es un registro)
+    - url_editar: función/endpoint que acepta pk y devuelve la URL de edición
+      (se pasa como string con {pk} o como una función Jinja callable)
+    - url_eliminar: igual
+    - pk_campo: nombre del campo PK en cada fila (default 'id')
+    - mostrar_acciones: bool (default True)
+
+  Alternativa: los listados pasan directamente HTML en el bloque acciones si
+  necesitan acciones distintas (ej. factura usa anular + borrar admin).
+#}
+
+{% macro tabla_crud(columnas, filas, pk_campo='id', url_editar=none, url_eliminar=none, mostrar_acciones=true, mensaje_vacio='No hay registros.') %}
+    {% if not filas %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> {{ mensaje_vacio }}
+        </div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    {% for col in columnas %}
+                        <th>{{ col.etiqueta }}</th>
+                    {% endfor %}
+                    {% if mostrar_acciones %}<th class="text-end">Acciones</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in filas %}
+                <tr>
+                    {% for col in columnas %}
+                        <td class="{{ col.clase_td or '' }}">{{ fila[col.clave] if fila[col.clave] is not none else '' }}</td>
+                    {% endfor %}
+                    {% if mostrar_acciones %}
+                    <td class="text-end">
+                        {% if url_editar %}
+                            <a href="{{ url_editar.replace('{pk}', fila[pk_campo]|string) }}"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                        {% endif %}
+                        {% if url_eliminar %}
+                            <form method="POST" action="{{ url_eliminar.replace('{pk}', fila[pk_campo]|string) }}"
+                                  class="d-inline"
+                                  onsubmit="return confirm('¿Eliminar este registro? Esta acción no se puede deshacer.');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% endmacro %}

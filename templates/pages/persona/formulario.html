@@ -1,0 +1,32 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nueva' }} persona — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h4 class="mb-0"><i class="bi bi-person"></i> {{ 'Editar' if editar else 'Nueva' }} persona</h4></div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label for="codigo" class="form-label">Código <span class="text-danger">*</span></label>
+                <input type="text" id="codigo" name="codigo" class="form-control"
+                       value="{{ item.codigo or '' }}" required {{ 'readonly' if editar else '' }}>
+            </div>
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ item.nombre or '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ item.email or '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input type="text" id="telefono" name="telefono" class="form-control" value="{{ item.telefono or '' }}">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+                <a href="{{ url_for('persona.listar') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

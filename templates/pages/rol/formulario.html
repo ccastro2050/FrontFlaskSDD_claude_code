@@ -1,0 +1,17 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nuevo' }} rol — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h4 class="mb-0"><i class="bi bi-people"></i> {{ 'Editar' if editar else 'Nuevo' }} rol</h4></div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text" name="nombre" class="form-control" value="{{ item.nombre or '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+            <a href="{{ url_for('rol.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

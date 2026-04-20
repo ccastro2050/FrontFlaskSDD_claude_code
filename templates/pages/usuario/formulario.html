@@ -1,0 +1,48 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nuevo' }} usuario — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h4 class="mb-0"><i class="bi bi-person-gear"></i> {{ 'Editar' if editar else 'Nuevo' }} usuario</h4></div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" name="email" class="form-control" value="{{ item.email or '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Contraseña
+                    {% if editar %}
+                        <small class="text-muted">(deja vacío para no cambiarla)</small>
+                    {% else %}
+                        <span class="text-danger">*</span>
+                    {% endif %}
+                </label>
+                <input type="password" name="contrasena" class="form-control"
+                       {{ 'required' if not editar else '' }} minlength="6">
+                <div class="form-text">Mínimo 6 caracteres, con mayúscula y dígito.</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Roles <span class="text-danger">*</span></label>
+                <select name="roles" class="form-select" multiple size="5" required>
+                    {% for r in roles %}
+                    <option value="{{ r.id }}"
+                        {% if r.id in (item.roles_ids or []) %}selected{% endif %}>
+                        {{ r.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Mantén presionado Ctrl (Cmd en Mac) para seleccionar varios.</div>
+            </div>
+            <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="requiere_cambio" name="requiere_cambio"
+                       {% if item.requiere_cambio %}checked{% endif %}>
+                <label for="requiere_cambio" class="form-check-label">
+                    Obligar cambio de contraseña en el próximo login
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+            <a href="{{ url_for('usuario.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

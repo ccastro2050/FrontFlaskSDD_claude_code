@@ -1,0 +1,41 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nuevo' }} producto — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0"><i class="bi bi-box-seam"></i> {{ 'Editar' if editar else 'Nuevo' }} producto</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label for="codigo" class="form-label">Código <span class="text-danger">*</span></label>
+                <input type="text" id="codigo" name="codigo" class="form-control codigo-producto"
+                       value="{{ item.codigo or '' }}" required {{ 'readonly' if editar else '' }}>
+            </div>
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text" id="nombre" name="nombre" class="form-control"
+                       value="{{ item.nombre or '' }}" required>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="stock" class="form-label">Stock <span class="text-danger">*</span></label>
+                    <input type="number" id="stock" name="stock" class="form-control font-mono"
+                           value="{{ item.stock or 0 }}" min="0" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="valorunitario" class="form-label">Valor unitario <span class="text-danger">*</span></label>
+                    <input type="number" id="valorunitario" name="valorunitario" class="form-control precio"
+                           value="{{ item.valorunitario or 0 }}" min="0" step="0.01" required>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Guardar
+                </button>
+                <a href="{{ url_for('producto.listar') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

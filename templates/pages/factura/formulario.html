@@ -1,0 +1,143 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nueva' }} factura — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0"><i class="bi bi-receipt"></i> {{ 'Editar' if editar else 'Nueva' }} factura</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" id="factura-form" novalidate>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                    <select name="fkidcliente" class="form-select" required>
+                        <option value="">— Selecciona un cliente —</option>
+                        {% for c in clientes %}
+                        <option value="{{ c.id }}"
+                            {% if (item.fkidcliente|string) == (c.id|string) %}selected{% endif %}>
+                            {{ c.id }} — {{ c.fkcodpersona }} / {{ c.fkcodempresa }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Vendedor <span class="text-danger">*</span></label>
+                    <select name="fkidvendedor" class="form-select" required>
+                        <option value="">— Selecciona un vendedor —</option>
+                        {% for v in vendedores %}
+                        <option value="{{ v.id }}"
+                            {% if (item.fkidvendedor|string) == (v.id|string) %}selected{% endif %}>
+                            {{ v.id }} — {{ v.carnet }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <h5 class="mt-3">Líneas de producto</h5>
+            <div class="table-responsive">
+                <table class="table align-middle" id="tabla-lineas">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th style="width: 140px;">Cantidad</th>
+                            <th class="text-end" style="width: 80px;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set prev = item.productos or [] %}
+                        {% if prev %}
+                            {% for l in prev %}
+                            <tr>
+                                <td>
+                                    <select name="fkcodproducto" class="form-select" required>
+                                        <option value="">— Producto —</option>
+                                        {% for p in productos %}
+                                        <option value="{{ p.codigo }}"
+                                            {% if (l.fkcodproducto|string) == (p.codigo|string) %}selected{% endif %}>
+                                            {{ p.codigo }} — {{ p.nombre }} (stock: {{ p.stock }}, ${{ '%.2f'|format(p.valorunitario|float) }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="cantidad" class="form-control font-mono"
+                                           value="{{ l.cantidad or 1 }}" min="1" required>
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-quitar-fila">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-agregar-fila">
+                <i class="bi bi-plus-lg"></i> Agregar producto
+            </button>
+
+            <hr>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Guardar factura
+            </button>
+            <a href="{{ url_for('factura.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+<template id="tpl-fila-producto">
+    <tr>
+        <td>
+            <select name="fkcodproducto" class="form-select" required>
+                <option value="">— Producto —</option>
+                {% for p in productos %}
+                <option value="{{ p.codigo }}">{{ p.codigo }} — {{ p.nombre }} (stock: {{ p.stock }}, ${{ '%.2f'|format(p.valorunitario|float) }})</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="number" name="cantidad" class="form-control font-mono" value="1" min="1" required>
+        </td>
+        <td class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger btn-quitar-fila">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// JavaScript vanilla mínimo: añadir/quitar filas del formulario maestro-detalle.
+// (No hay framework JS — cumple Principio II de la Constitución.)
+(function () {
+    const tbody = document.querySelector('#tabla-lineas tbody');
+    const tpl = document.querySelector('#tpl-fila-producto');
+    const btnAgregar = document.querySelector('#btn-agregar-fila');
+
+    function quitarFilaHandler(e) {
+        const btn = e.target.closest('.btn-quitar-fila');
+        if (!btn) return;
+        const tr = btn.closest('tr');
+        if (tr) tr.remove();
+    }
+
+    btnAgregar.addEventListener('click', function () {
+        const nuevaFila = tpl.content.cloneNode(true);
+        tbody.appendChild(nuevaFila);
+    });
+
+    tbody.addEventListener('click', quitarFilaHandler);
+
+    // Si no hay filas existentes al cargar, agregamos una en blanco.
+    if (tbody.children.length === 0) {
+        tbody.appendChild(tpl.content.cloneNode(true));
+    }
+})();
+</script>
+{% endblock %}

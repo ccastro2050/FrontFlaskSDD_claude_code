@@ -1,0 +1,32 @@
+{% extends 'layout/base.html' %}
+{% block title %}Rutas — Zenith{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-signpost-split"></i> Rutas</h1>
+    <a href="{{ url_for('ruta.nuevo') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nueva ruta</a>
+</div>
+
+{% if items %}
+<table class="table table-hover align-middle">
+    <thead><tr><th>#</th><th>Ruta</th><th>Descripción</th><th class="text-end">Acciones</th></tr></thead>
+    <tbody>
+        {% for r in items %}
+        <tr>
+            <td>{{ r.id }}</td>
+            <td class="font-mono">{{ r.ruta }}</td>
+            <td>{{ r.descripcion }}</td>
+            <td class="text-end">
+                <a href="{{ url_for('ruta.editar', pk=r.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                <form method="POST" action="{{ url_for('ruta.eliminar', pk=r.id) }}"
+                      class="d-inline" onsubmit="return confirm('¿Eliminar la ruta {{ r.ruta }}?');">
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> No hay rutas registradas.</div>
+{% endif %}
+{% endblock %}

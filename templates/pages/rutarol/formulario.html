@@ -1,0 +1,29 @@
+{% extends 'layout/base.html' %}
+{% block title %}Nuevo permiso — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h4 class="mb-0"><i class="bi bi-shield-lock"></i> Nuevo permiso</h4></div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Rol <span class="text-danger">*</span></label>
+                <select name="fkid_rol" class="form-select" required>
+                    <option value="">— Selecciona un rol —</option>
+                    {% for r in roles %}<option value="{{ r.id }}">{{ r.nombre }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ruta <span class="text-danger">*</span></label>
+                <select name="fkid_ruta" class="form-select" required>
+                    <option value="">— Selecciona una ruta —</option>
+                    {% for r in rutas %}
+                    <option value="{{ r.id }}">{{ r.ruta }} — {{ r.descripcion }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Crear permiso</button>
+            <a href="{{ url_for('rutarol.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,4 +1,13 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+.env
 .claude/
+.specify/feature.json
+*.egg-info/
+dist/
+build/
+.DS_Store
+Thumbs.db

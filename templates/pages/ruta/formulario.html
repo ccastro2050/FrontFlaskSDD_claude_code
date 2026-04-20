@@ -1,0 +1,22 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nueva' }} ruta — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h4 class="mb-0"><i class="bi bi-signpost-split"></i> {{ 'Editar' if editar else 'Nueva' }} ruta</h4></div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Ruta <span class="text-danger">*</span></label>
+                <input type="text" name="ruta" class="form-control font-mono" value="{{ item.ruta or '' }}"
+                       required placeholder="/ejemplo">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción <span class="text-danger">*</span></label>
+                <input type="text" name="descripcion" class="form-control" value="{{ item.descripcion or '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+            <a href="{{ url_for('ruta.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

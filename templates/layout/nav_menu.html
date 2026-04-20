@@ -1,0 +1,47 @@
+{#
+  templates/layout/nav_menu.html — menú lateral dinámico.
+
+  Cada entrada del menú sólo se renderiza si la ruta asociada está en
+  ``rutas_permitidas`` del usuario actual (inyectado por el context processor
+  de middleware.py). Los iconos siguen el Manual de Marca Zenith.
+
+  Se define una macro ``item`` que decide renderizar o no según el permiso.
+#}
+
+{% macro item(ruta, etiqueta, icono) %}
+    {% if ruta in rutas_permitidas or (ruta == '/' and usuario) %}
+        <a class="nav-link {% if request.path == ruta or (ruta != '/' and request.path.startswith(ruta + '/')) %}active{% endif %}"
+           href="{{ ruta }}">
+            <i class="bi {{ icono }}"></i>
+            <span>{{ etiqueta }}</span>
+        </a>
+    {% endif %}
+{% endmacro %}
+
+<nav class="zenith-sidebar">
+    <div class="sidebar-brand">
+        <h2><i class="bi bi-bar-chart-fill"></i> Zenith</h2>
+        <small class="text-white-50">Gestión de ventas</small>
+    </div>
+
+    <div class="nav flex-column">
+        {# Home siempre visible para usuarios autenticados #}
+        {{ item('/', 'Inicio', 'bi-house-door') }}
+
+        {# Facturación #}
+        {{ item('/facturas', 'Facturas', 'bi-receipt') }}
+
+        {# Catálogos #}
+        {{ item('/productos', 'Productos', 'bi-box-seam') }}
+        {{ item('/personas', 'Personas', 'bi-person') }}
+        {{ item('/empresas', 'Empresas', 'bi-building') }}
+        {{ item('/clientes', 'Clientes', 'bi-person-badge') }}
+        {{ item('/vendedores', 'Vendedores', 'bi-person-workspace') }}
+        {{ item('/roles', 'Roles', 'bi-people') }}
+        {{ item('/rutas', 'Rutas', 'bi-signpost-split') }}
+
+        {# Administración #}
+        {{ item('/usuarios', 'Usuarios', 'bi-person-gear') }}
+        {{ item('/permisos', 'Permisos', 'bi-shield-lock') }}
+    </div>
+</nav>

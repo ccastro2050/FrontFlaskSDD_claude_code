@@ -1,0 +1,48 @@
+{% extends 'layout/base.html' %}
+{% block title %}Productos — Zenith{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-box-seam"></i> Productos</h1>
+    <a href="{{ url_for('producto.nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo producto
+    </a>
+</div>
+
+{% if items %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Código</th><th>Nombre</th><th class="text-end">Stock</th>
+                <th class="text-end">Valor unitario</th><th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in items %}
+            <tr>
+                <td><span class="codigo-producto">{{ p.codigo }}</span></td>
+                <td>{{ p.nombre }}</td>
+                <td class="text-end font-mono">{{ p.stock }}</td>
+                <td class="text-end precio">${{ '%.2f'|format(p.valorunitario|float) }}</td>
+                <td class="text-end">
+                    <a href="{{ url_for('producto.editar', pk=p.codigo) }}"
+                       class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('producto.eliminar', pk=p.codigo) }}"
+                          class="d-inline"
+                          onsubmit="return confirm('¿Eliminar el producto {{ p.codigo }}?');">
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> No hay productos registrados.</div>
+{% endif %}
+{% endblock %}

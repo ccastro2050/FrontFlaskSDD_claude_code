@@ -1,0 +1,40 @@
+{% extends 'layout/base.html' %}
+{% block title %}{{ 'Editar' if editar else 'Nuevo' }} cliente — Zenith{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h4 class="mb-0"><i class="bi bi-person-badge"></i> {{ 'Editar' if editar else 'Nuevo' }} cliente</h4></div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Persona <span class="text-danger">*</span></label>
+                <select name="fkcodpersona" class="form-select" required>
+                    <option value="">— Selecciona una persona —</option>
+                    {% for p in personas %}
+                    <option value="{{ p.codigo }}" {% if item.fkcodpersona == p.codigo %}selected{% endif %}>
+                        {{ p.nombre }} ({{ p.codigo }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Empresa <span class="text-danger">*</span></label>
+                <select name="fkcodempresa" class="form-select" required>
+                    <option value="">— Selecciona una empresa —</option>
+                    {% for e in empresas %}
+                    <option value="{{ e.codigo }}" {% if item.fkcodempresa == e.codigo %}selected{% endif %}>
+                        {{ e.nombre }} ({{ e.codigo }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Crédito <span class="text-danger">*</span></label>
+                <input type="number" name="credito" class="form-control precio"
+                       value="{{ item.credito or 0 }}" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+            <a href="{{ url_for('cliente.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

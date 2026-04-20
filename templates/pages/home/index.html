@@ -1,0 +1,44 @@
+{% extends 'layout/base.html' %}
+{% block title %}Inicio — Zenith{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1>Hola, {{ usuario.nombre or usuario.email }}</h1>
+        <p class="text-muted">
+            {% if roles %}
+                Rol{{ 's' if roles|length > 1 else '' }}:
+                {% for r in roles %}
+                    <span class="badge bg-secondary">{{ r }}</span>
+                {% endfor %}
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% set accesos = [
+        ('/facturas', 'Facturas', 'bi-receipt', 'Emitir y consultar facturas'),
+        ('/productos', 'Productos', 'bi-box-seam', 'Gestionar el catálogo de productos'),
+        ('/clientes', 'Clientes', 'bi-person-badge', 'Ver y editar clientes'),
+        ('/vendedores', 'Vendedores', 'bi-person-workspace', 'Equipo de ventas'),
+        ('/usuarios', 'Usuarios', 'bi-person-gear', 'Administrar cuentas'),
+        ('/permisos', 'Permisos', 'bi-shield-lock', 'Configurar accesos por rol'),
+    ] %}
+    {% for ruta, titulo, icono, descripcion in accesos %}
+        {% if ruta in rutas_permitidas %}
+        <div class="col-md-4">
+            <a href="{{ ruta }}" class="text-decoration-none">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi {{ icono }}"></i> {{ titulo }}
+                        </h5>
+                        <p class="card-text text-muted">{{ descripcion }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

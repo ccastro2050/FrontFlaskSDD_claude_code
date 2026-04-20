@@ -1,0 +1,336 @@
+/* ============================================================================
+ * FrontFlaskSDD — Identidad visual Zenith
+ *
+ * Único archivo CSS personalizado (Principio IV de la Constitución).
+ * Todas las variables de marca viven en :root y se usan para sobrescribir
+ * Bootstrap 5.3. NO se usa la paleta por defecto de Bootstrap.
+ *
+ * Fuente de verdad de valores: Manual_de_Marca_Zenith.md
+ * ========================================================================== */
+
+:root {
+    /* --- Paleta Zenith ---------------------------------------------------- */
+    --zenith-azul-primario: #0A2647;
+    --zenith-dorado: #E8AA2E;
+    --zenith-azul-medio: #144272;
+    --zenith-azul-claro: #205295;
+    --zenith-gris-fondo: #F5F6F8;
+    --zenith-gris-texto: #4A4A4A;
+    --zenith-blanco: #FFFFFF;
+    --zenith-exito: #2E7D32;
+    --zenith-error: #C62828;
+    --zenith-advertencia: #E8AA2E;
+    --zenith-info: #144272;
+
+    /* --- Tipografía ------------------------------------------------------- */
+    --zenith-fuente-base: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --zenith-fuente-mono: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+
+    /* --- Espacios, bordes y sombras -------------------------------------- */
+    --zenith-radio: 6px;
+    --zenith-radio-grande: 12px;
+    --zenith-sombra-tarjeta: 0 2px 8px rgba(10, 38, 71, 0.08);
+    --zenith-sombra-boton: 0 1px 3px rgba(10, 38, 71, 0.15);
+
+    /* --- Overrides de Bootstrap ------------------------------------------ */
+    --bs-primary: var(--zenith-azul-primario);
+    --bs-primary-rgb: 10, 38, 71;
+    --bs-secondary: var(--zenith-dorado);
+    --bs-secondary-rgb: 232, 170, 46;
+    --bs-body-font-family: var(--zenith-fuente-base);
+    --bs-body-color: var(--zenith-gris-texto);
+    --bs-body-bg: var(--zenith-gris-fondo);
+    --bs-link-color: var(--zenith-azul-medio);
+    --bs-link-hover-color: var(--zenith-dorado);
+    --bs-border-radius: var(--zenith-radio);
+}
+
+/* --- Base ------------------------------------------------------------------ */
+body {
+    font-family: var(--zenith-fuente-base);
+    background: var(--zenith-gris-fondo);
+    color: var(--zenith-gris-texto);
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--zenith-fuente-base);
+    color: var(--zenith-azul-primario);
+    font-weight: 600;
+}
+
+/* Monoespaciada para códigos, números de factura, precios */
+code,
+.font-mono,
+.numero-factura,
+.codigo-producto,
+.precio {
+    font-family: var(--zenith-fuente-mono);
+}
+
+/* --- Sidebar --------------------------------------------------------------- */
+.zenith-sidebar {
+    background: var(--zenith-azul-primario);
+    color: var(--zenith-blanco);
+    min-height: 100vh;
+    width: 260px;
+    padding: 1.5rem 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.zenith-sidebar .sidebar-brand {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.zenith-sidebar .sidebar-brand h2 {
+    color: var(--zenith-blanco);
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.zenith-sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.65rem 1.5rem;
+    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.zenith-sidebar .nav-link:hover {
+    background: var(--zenith-azul-medio);
+    color: var(--zenith-dorado);
+    border-left-color: var(--zenith-dorado);
+}
+
+.zenith-sidebar .nav-link.active {
+    background: var(--zenith-azul-medio);
+    color: var(--zenith-dorado);
+    border-left-color: var(--zenith-dorado);
+    font-weight: 500;
+}
+
+.zenith-sidebar .nav-link i {
+    font-size: 1.1rem;
+    width: 1.2rem;
+    text-align: center;
+}
+
+/* --- Topbar ---------------------------------------------------------------- */
+.zenith-topbar {
+    background: var(--zenith-blanco);
+    border-bottom: 1px solid #E5E7EB;
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--zenith-sombra-tarjeta);
+}
+
+.zenith-topbar .usuario-info {
+    color: var(--zenith-azul-primario);
+    font-weight: 500;
+}
+
+/* --- Área de contenido principal (shift por sidebar) ---------------------- */
+.zenith-main {
+    margin-left: 260px;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.zenith-contenido {
+    padding: 1.5rem;
+}
+
+/* --- Botones --------------------------------------------------------------- */
+.btn-primary {
+    background-color: var(--zenith-dorado);
+    border-color: var(--zenith-dorado);
+    color: var(--zenith-azul-primario);
+    font-weight: 600;
+    box-shadow: var(--zenith-sombra-boton);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #D49520;
+    border-color: #D49520;
+    color: var(--zenith-azul-primario);
+}
+
+.btn-secondary {
+    background-color: var(--zenith-azul-medio);
+    border-color: var(--zenith-azul-medio);
+    color: var(--zenith-blanco);
+}
+
+.btn-secondary:hover {
+    background-color: var(--zenith-azul-claro);
+    border-color: var(--zenith-azul-claro);
+}
+
+.btn-danger {
+    background-color: var(--zenith-error);
+    border-color: var(--zenith-error);
+}
+
+/* --- Tablas ---------------------------------------------------------------- */
+.table thead {
+    background: var(--zenith-azul-primario);
+    color: var(--zenith-blanco);
+}
+
+.table thead th {
+    border-bottom: 3px solid var(--zenith-dorado);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(232, 170, 46, 0.08);
+}
+
+/* --- Formularios ----------------------------------------------------------- */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--zenith-dorado);
+    box-shadow: 0 0 0 0.2rem rgba(232, 170, 46, 0.25);
+}
+
+.form-label {
+    color: var(--zenith-azul-primario);
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+}
+
+/* --- Tarjetas -------------------------------------------------------------- */
+.card {
+    border: none;
+    border-radius: var(--zenith-radio-grande);
+    box-shadow: var(--zenith-sombra-tarjeta);
+}
+
+.card-header {
+    background: var(--zenith-azul-primario);
+    color: var(--zenith-blanco);
+    border-radius: var(--zenith-radio-grande) var(--zenith-radio-grande) 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+/* --- Flash messages con borde izquierdo 4px ------------------------------- */
+.alert {
+    border: 1px solid transparent;
+    border-left-width: 4px !important;
+    border-radius: var(--zenith-radio);
+}
+
+.alert-success {
+    background-color: #E8F5E9;
+    color: #1B5E20;
+    border-left-color: var(--zenith-exito) !important;
+}
+
+.alert-danger {
+    background-color: #FFEBEE;
+    color: #8E0000;
+    border-left-color: var(--zenith-error) !important;
+}
+
+.alert-warning {
+    background-color: #FFF8E1;
+    color: #855A00;
+    border-left-color: var(--zenith-advertencia) !important;
+}
+
+.alert-info {
+    background-color: #E3F2FD;
+    color: #0B3766;
+    border-left-color: var(--zenith-info) !important;
+}
+
+/* --- Login layout (fondo gradiente) --------------------------------------- */
+.zenith-login {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--zenith-azul-primario) 0%, var(--zenith-azul-medio) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.zenith-login-card {
+    background: var(--zenith-blanco);
+    border-radius: var(--zenith-radio-grande);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.zenith-login-card h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.zenith-login-card .subtitulo {
+    text-align: center;
+    color: var(--zenith-gris-texto);
+    margin-bottom: 2rem;
+}
+
+.zenith-login-card .btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+/* --- Estados de factura --------------------------------------------------- */
+.estado-activa {
+    background: #E8F5E9;
+    color: #1B5E20;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.estado-anulada {
+    background: #FFEBEE;
+    color: #8E0000;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: line-through;
+}
+
+/* --- Página de acceso denegado -------------------------------------------- */
+.acceso-denegado {
+    text-align: center;
+    padding: 4rem 1rem;
+}
+
+.acceso-denegado i {
+    font-size: 4rem;
+    color: var(--zenith-error);
+    margin-bottom: 1rem;
+}
+
+/* --- Responsive (colapso de sidebar en móvil, básico) --------------------- */
+@media (max-width: 768px) {
+    .zenith-sidebar {
+        width: 100%;
+        position: static;
+        min-height: auto;
+    }
+    .zenith-main {
+        margin-left: 0;
+    }
+}
