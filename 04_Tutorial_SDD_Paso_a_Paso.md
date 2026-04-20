@@ -1628,47 +1628,94 @@ Jinja2 funciona igual, pero con HTML:
 
 ### Ejecutar el comando
 
+> **Importante:** Este comando se ejecuta en el prompt `❯` de Claude Code CLI. No necesita prompt adicional — lee la constitution y la spec automáticamente.
+
 ```
 /speckit-plan
 ```
 
-(No necesita prompt adicional — lee `constitution.md` y `spec.md` automáticamente)
+### Qué pasa cuando ejecutas el comando
 
-### Despues de ejecutar: como revisar el resultado
+Claude Code CLI va a:
+
+1. **Preguntar permiso para ejecutar scripts** de PowerShell y Bash. Selecciona `1. Yes` en cada uno.
+2. **Trabajar 4-6 minutos** generando múltiples archivos. No toques nada mientras trabaja.
+3. **Pedir permiso para guardar cada archivo** (puede ser 5-7 archivos). Selecciona `1. Yes` en cada uno.
+4. **Verificar la constitution** antes y después de generar el plan (Constitution Check: PASS/FAIL).
+5. **Mostrar un resumen final** con todos los artefactos generados.
+
+**Archivos que genera:**
+
+| Archivo | Qué contiene |
+|---------|-------------|
+| `specs/001-.../plan.md` | Plan técnico: contexto, verificación de constitution, estructura de carpetas, dependencias |
+| `specs/001-.../research.md` | Decisiones técnicas investigadas (por qué Flask y no Django, por qué requests y no httpx, etc.) |
+| `specs/001-.../data-model.md` | Modelo de datos: 11 entidades con campos, relaciones, diagrama ER en Mermaid y reglas de validación |
+| `specs/001-.../contracts/api-contracts.md` | Contratos de API: cada endpoint que el frontend consume, con request/response de ejemplo |
+| `specs/001-.../quickstart.md` | Guía de inicio rápido: setup, datos semilla, diagramas de flujo Mermaid, troubleshooting |
+| `CLAUDE.md` | Contexto actualizado para Claude Code con referencias al plan y artefactos |
+
+> **¿Por qué tantos archivos?** Porque el plan no es solo "estructura de carpetas". Es un diseño técnico completo que incluye investigación de decisiones, modelo de datos, contratos de API y guía de inicio. Cada archivo tiene un propósito diferente y todos se alimentan entre sí.
+
+> **Constitution Check:** Al inicio y al final del proceso, la IA verifica que el plan respete TODOS los principios de la constitution (sin ORM, sin frameworks JS, identidad Zenith, etc.). Si algún principio se viola, el resultado es FAIL y hay que corregir.
+
+### Después de ejecutar: cómo revisar el resultado
 
 #### Checklist de revisión
 
-- [ ] **Arquitectura de carpetas:** El plan define donde va cada archivo?
-- [ ] **Componentes:** Lista todos los archivos Python (app.py, routes/*.py, services/*.py)?
-- [ ] **Dependencias:** Menciona Flask, requests, pytest en un requirements.txt?
-- [ ] **ApiService:** Define los métodos listar, crear, actualizar, eliminar, ejecutar_sp?
-- [ ] **AuthService:** Define login, obtener_roles, obtener_rutas, cambiar_contraseña?
-- [ ] **Middleware:** Define before_request y context_processor?
-- [ ] **Templates:** Define base.html, nav_menu.html y las 14 páginas?
-- [ ] **Respeta constitution:** No sugiere Django, React, ORM ni nada prohibido?
+**plan.md:**
 
-#### Ejercicio practico
+- [ ] ¿La estructura de carpetas incluye `routes/`, `services/`, `templates/`, `static/css/app.css`?
+- [ ] ¿Lista todos los Blueprints (auth, home, producto, persona, empresa, cliente, vendedor, rol, ruta, usuario, rutarol, factura)?
+- [ ] ¿Menciona `ApiService` con los métodos listar, crear, actualizar, eliminar, ejecutar_sp?
+- [ ] ¿Menciona `AuthService` con login, roles, rutas, cambio de contraseña?
+- [ ] ¿Menciona middleware con `@app.before_request` y context processor?
+- [ ] ¿Las dependencias son solo Flask, requests, pytest (y quizás python-dotenv)? ¿Sin ORM ni drivers de BD?
+- [ ] ¿Constitution Check dice PASS?
 
-Dibuja en un papel (si, papel físico) la arquitectura del plan:
+**data-model.md:**
+
+- [ ] ¿Tiene diagrama ER en Mermaid con las 11-12 entidades?
+- [ ] ¿Cada entidad tiene campos con tipos y reglas de validación?
+- [ ] ¿Factura tiene campo `estado` (activa/anulada)?
+- [ ] ¿Las relaciones coinciden con nuestro diagrama ER original?
+
+**contracts/api-contracts.md:**
+
+- [ ] ¿Lista los endpoints CRUD genéricos (GET, POST, PUT, DELETE)?
+- [ ] ¿Lista los 16 stored procedures con sus parámetros y respuestas?
+- [ ] ¿El endpoint de login muestra request/response de ejemplo?
+- [ ] ¿Menciona `camposEncriptar` para BCrypt?
+
+**research.md:**
+
+- [ ] ¿Justifica por qué Flask y no Django/FastAPI?
+- [ ] ¿Justifica por qué `requests` y no httpx u otra librería?
+- [ ] ¿Las decisiones son coherentes con la constitution?
+
+#### Ejercicio práctico
+
+Dibuja en un papel (sí, papel físico) la arquitectura del plan:
 - Cajas para cada componente (ApiService, AuthService, Middleware, Blueprints)
-- Flechas mostrando quien llama a quien
+- Flechas mostrando quién llama a quién
 - Colores para diferenciar frontend, servicios, API
 
-Comparalo con el diagrama del plan.md. Son iguales? Falta algo?
+Compáralo con el diagrama del plan.md. ¿Son iguales? ¿Falta algo?
 
 #### Si el resultado no cumple tus expectativas
 
-| Problema | Opcion | Que hacer |
+| Problema | Opción | Qué hacer |
 |----------|--------|-----------|
-| La estructura de carpetas no es la qué quieres | **A** (editar) | Corregir plan.md con tu estructura. El plan es TU diseño |
-| Sugiere librerías prohibidas (ej: SQLAlchemy, React) | **C** (ambos) | Verificar que la constitution lo prohibe. Editar plan.md y re-ejecutar reforzando: "Respetar estrictamente la constitution" |
-| Los componentes están listados pero sin detalle | **B** (re-ejecutar) | Agregar al prompt: "Detallar los métodos de cada servicio y los endpoints qué consume" |
-| La arquitectura no coincide con la spec | **B** (re-ejecutar) | Algo se perdio entre spec y plan. Re-ejecutar `/plan` verificando qué spec.md está completo |
+| La estructura de carpetas no es la que quieres | **A** (editar) | Corregir plan.md con tu estructura. El plan es TU diseño |
+| Sugiere librerías prohibidas (SQLAlchemy, React) | **A** (editar) | Si la constitution lo prohíbe y la IA lo incluyó, editarlo directamente. La constitution ya debería haberlo prevenido |
+| Los componentes están listados pero sin detalle | **B** (re-ejecutar) | Re-ejecutar `/speckit-plan` — la IA leerá la spec de nuevo |
+| El Constitution Check dice FAIL | **A** (editar) | Corregir la violación en el plan. Si la violación es correcta (excepción justificada), documentarla en Complexity Tracking |
+| El data-model no coincide con las tablas de la API | **A** (editar) | Ajustar data-model.md para que coincida con el esquema real de la API |
 
 ### Competencia adquirida
 
-> **Despues de completar está fase, ya sabes:**
-> Leer un plan técnico de implementación. Entiendes qué es una API REST, un middleware, un template engine y una arquitectura de carpetas. Sabes cómo se organizan los componentes de un proyecto web. Esto es lo que hace un **desarrollador full-stack** cuando planifica una feature.
+> **Después de completar esta fase, ya sabes:**
+> Leer un plan técnico de implementación completo: estructura de carpetas, modelo de datos, contratos de API, decisiones técnicas y verificación contra la constitution. Sabes que el plan no es solo "dónde van los archivos" sino un diseño técnico integral. Esto es lo que hace un **desarrollador full-stack** o **tech lead** cuando planifica una feature.
 
 ---
 
