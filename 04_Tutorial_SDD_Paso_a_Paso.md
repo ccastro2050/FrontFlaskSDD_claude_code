@@ -2217,9 +2217,118 @@ app.register_blueprint(producto_bp)     # Listo, /producto funciona
 <button class="btn btn-primary">Guardar</button>
 ```
 
-### Ejecutar por rondas
+### Ejecutar el comando
 
-> **No ejecutes todo de golpe.** Divide en 4 rondas y verifica entre cada una.
+> **Importante:** Este comando se ejecuta en el prompt `❯` de Claude Code CLI.
+
+```
+/speckit-implement
+```
+
+Claude Code CLI va a:
+
+1. **Verificar prerrequisitos** (constitution, spec, plan, tasks). Te pide permiso — selecciona `1. Yes`.
+2. **Mostrar el estado de los checklists.** Si hay checklists pendientes, te da 3 opciones:
+   - **A — Parar:** Cerrar los checklists primero
+   - **B — MVP acotado:** Implementar solo las fases 1-3 (login + RBAC)
+   - **C — Proceder completo:** Implementar las 83 tareas de corrido
+3. **Generar código** archivo por archivo, pidiendo permiso para cada uno.
+
+> **Consejo:** Cuando empiece a pedir permiso para guardar archivos, selecciona `2. Yes, and don't ask again` para que no pregunte por cada uno de los ~50 archivos que va a crear. Esto ahorra tiempo.
+
+> **Tiempo estimado:** 20-30 minutos para las 83 tareas. No toques nada mientras trabaja.
+
+### Qué pasa durante la implementación
+
+Claude Code CLI va ejecutando las tareas fase por fase:
+
+```
+✔ Phase 1 — Setup (T001-T005)
+✔ Phase 2 — Foundational (T006-T021)
+◼ Phase 3 — US1 Auth + RBAC (T022-T032)    ← trabajando aquí
+◻ Phase 4 — US2 Facturación (T033-T041)
+◻ Phase 5 — US3 CRUDs (T042-T057)
+◻ Phase 6 — US4 Usuarios/Permisos (T058-T066)
+◻ Phase 7 — US5 Contraseñas (T067-T073)
+◻ Phase 8 — Polish (T074-T081)
+```
+
+Durante el proceso, la IA:
+- **Crea los archivos** de código Python, templates HTML, CSS
+- **Consulta la API real** para descubrir la estructura de la BD (tablas, PKs, FKs)
+- **Crea usuarios de prueba** para los tests
+- **Ejecuta los tests** automáticamente para verificar que el código funciona
+- **Corrige errores** que encuentra (encoding, formato de API, etc.)
+
+### Después de la implementación: probar el proyecto
+
+Cuando termina, arranca el servidor Flask:
+
+```powershell
+# En PowerShell (no en Claude Code CLI):
+cd "C:\Users\fcl\OneDrive\Desktop\SDD\FrontFlaskSDD"
+set PYTHONUTF8=1
+venv\Scripts\python.exe -m flask --app app run --debug
+```
+
+> **Qué significa cada parte:**
+> - `set PYTHONUTF8=1` — Configura Python para usar UTF-8 (tildes y eñes funcionan en Windows)
+> - `venv\Scripts\python.exe` — Usa el Python del entorno virtual
+> - `-m flask` — Ejecuta Flask como módulo
+> - `--app app` — El archivo principal es `app.py`
+> - `run --debug` — Modo debug (recarga automática al editar archivos)
+
+Abre `http://127.0.0.1:5000` en el navegador y prueba:
+
+1. **Login:** Usar las credenciales del usuario de prueba
+2. **Menú lateral:** Verificar que muestra los módulos según el rol
+3. **CRUDs:** Probar listar, crear, editar, eliminar en Productos, Personas, etc.
+4. **Facturas:** Crear, ver detalle, anular
+
+### Los errores son normales — cómo corregirlos
+
+> **Lección importante:** El código generado por la IA **NUNCA** funciona perfecto a la primera. Siempre hay errores que hay que corregir. Esto es normal y esperado — es parte del trabajo del Desarrollador con IA.
+
+**Errores comunes que encontramos en la práctica:**
+
+| Error | Causa | Cómo lo corregimos |
+|-------|-------|-------------------|
+| "No se pudieron cargar las facturas: HTTP 400" | El `api_service.py` enviaba los parámetros del SP en formato incorrecto (`{"nombre": ...}` en vez de `{"nombreSP": ...}`) | Corregir el método `ejecutar_sp` para usar `nombreSP` y poner los parámetros al mismo nivel |
+| Error `'dict object' has no attribute 'total'` en detalle de factura | El SP retorna `{"factura": {...}, "productos": [...]}` pero el template esperaba `item.total` directo | Desempacar la respuesta del SP antes de pasarla al template |
+| Títulos de cards no visibles (texto blanco sobre fondo azul oscuro) | Los `<h5>` dentro de `.card-header` heredaban `color: azul-primario` del CSS general en vez de blanco | Agregar regla CSS `.card-header h1, .card-header h2, ... { color: white }` |
+| Tests fallan por encoding de ñ en Windows | Python en Windows usa cp1252 por defecto, no UTF-8 | Usar `set PYTHONUTF8=1` antes de ejecutar |
+| Login falla con "credenciales inválidas" | La API espera `{tabla, campoUsuario, campoContrasena, usuario, contrasena}`, no `{email, contrasena}` | Ajustar el formato del payload de login en `auth_service.py` |
+
+**El proceso de corrección:**
+
+```mermaid
+graph TB
+    A["Probar en el navegador"]
+    B{"¿Funciona?"}
+    C["Siguiente módulo"]
+    D["Leer el error en la terminal"]
+    E["Identificar la causa"]
+    F["Corregir el archivo"]
+    G["Recargar navegador
+    (Ctrl+Shift+R)"]
+
+    A --> B
+    B -->|"Sí"| C
+    B -->|"No"| D
+    D --> E --> F --> G --> A
+
+    style B fill:#f59e0b,stroke:#d97706,color:#fff
+    style C fill:#22c55e,stroke:#16a34a,color:#fff
+    style D fill:#ef4444,stroke:#dc2626,color:#fff
+```
+
+> **Dónde ver los errores:** Cuando Flask está en modo `--debug`, los errores aparecen en dos lugares:
+> - **En el navegador:** Una página con el traceback completo (ruta del archivo, línea, error)
+> - **En la terminal de PowerShell:** El log de Flask con cada request y su resultado
+
+> **Cómo pedir ayuda a la IA:** Puedes copiar el error y pegarlo en Claude Code CLI (o en este chat) y pedir que lo corrija. Pero **primero intenta entender el error tú mismo** — eso es lo que te hace crecer como desarrollador.
+
+### Ejecutar por rondas (alternativa)
 
 #### Ronda 1: Cimientos (Tasks 1-5)
 

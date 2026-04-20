@@ -224,6 +224,16 @@ code,
     padding: 1rem 1.5rem;
 }
 
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6,
+.card-header .card-title {
+    color: var(--zenith-blanco);
+}
+
 /* --- Flash messages con borde izquierdo 4px ------------------------------- */
 .alert {
     border: 1px solid transparent;
