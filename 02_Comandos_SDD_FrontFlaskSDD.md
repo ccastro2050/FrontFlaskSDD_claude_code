@@ -456,11 +456,11 @@ cliente, vendedor, factura, productosporfactura,
 rol_usuario, rutarol
 ```
 
-**15 stored procedures:**
+**16 stored procedures:**
 
 | Grupo | SPs |
 |-------|-----|
-| Facturas (5) | `sp_insertar_factura_y_productosporfactura`, `sp_consultar_factura_y_productosporfactura`, `sp_listar_facturas_y_productosporfactura`, `sp_actualizar_factura_y_productosporfactura`, `sp_borrar_factura_y_productosporfactura` |
+| Facturas (6) | `sp_insertar_factura_y_productosporfactura`, `sp_consultar_factura_y_productosporfactura`, `sp_listar_facturas_y_productosporfactura`, `sp_actualizar_factura_y_productosporfactura`, `sp_anular_factura`, `sp_borrar_factura_y_productosporfactura` |
 | Usuarios (6) | `crear_usuario_con_roles`, `actualizar_usuario_con_roles`, `eliminar_usuario_con_roles`, `actualizar_roles_usuario`, `consultar_usuario_con_roles`, `listar_usuarios_con_roles` |
 | Permisos (4) | `verificar_acceso_ruta`, `listar_rutarol`, `crear_rutarol`, `eliminar_rutarol` |
 
@@ -557,67 +557,68 @@ erDiagram
 ```
 /constitution
 
-El proyecto FrontFlaskSDD es un frontend web que consume una API REST generica en C#.
+El proyecto FrontFlaskSDD es un frontend web que consume una API REST genérica en C#.
 Repositorio de la API: https://github.com/ccastro2050/ApiGenericaCsharp
 
-PRINCIPIOS DE TECNOLOGIA:
+PRINCIPIOS DE TECNOLOGÍA:
 - Python 3.12 con Flask 3.x como framework web
 - Templates con Jinja2 y Bootstrap 5.3
-- NO usar ORM ni acceso directo a base de datos. Todo se consume via API REST
-- La API REST esta en C# .NET 9 con Dapper (no Entity Framework)
-- Comunicacion frontend-API mediante HTTP (requests) + JWT Bearer token
-- La API soporta SQL Server, PostgreSQL y MySQL/MariaDB con el mismo codigo
+- NO usar ORM ni acceso directo a base de datos. Todo se consume vía API REST
+- La API REST está en C# .NET 9 con Dapper (no Entity Framework)
+- Comunicación frontend-API mediante HTTP (requests) + JWT Bearer token
+- La API soporta SQL Server, PostgreSQL y MySQL/MariaDB con el mismo código
 
 PRINCIPIOS DE ARQUITECTURA:
-- Patron Blueprint: cada modulo del frontend es un Blueprint independiente de Flask
-- Servicio generico centralizado (ApiService) para operaciones CRUD (listar, crear, actualizar, eliminar)
-- Servicio generico centralizado para ejecucion de stored procedures (ejecutar_sp)
-- Servicio de autenticacion separado (AuthService) con descubrimiento dinamico de PKs y FKs
-- Middleware de autenticacion con @app.before_request que verifica sesion y permisos
-- Context processor para inyectar variables de sesion (usuario, roles, rutas_permitidas) en todas las templates
+- Patrón Blueprint: cada módulo del frontend es un Blueprint independiente de Flask
+- Servicio genérico centralizado (ApiService) para operaciones CRUD (listar, crear, actualizar, eliminar)
+- Servicio genérico centralizado para ejecución de stored procedures (ejecutar_sp)
+- Servicio de autenticación separado (AuthService) con descubrimiento dinámico de PKs y FKs
+- Middleware de autenticación con @app.before_request que verifica sesión y permisos
+- Context processor para inyectar variables de sesión (usuario, roles, rutas_permitidas) en todas las templates
 
 PRINCIPIOS DE SEGURIDAD:
-- Autenticacion JWT: el frontend obtiene token de la API y lo almacena en session de Flask
+- Autenticación JWT: el frontend obtiene token de la API y lo almacena en session de Flask
 - Control de acceso RBAC: las rutas permitidas por rol se consultan a la BD y se verifican en cada request
-- Contrasenas encriptadas con BCrypt (la API lo maneja via parametro camposEncriptar)
-- Secret key de Flask para encriptar cookies de sesion
-- Rutas publicas: /login, /logout, /recuperar-contrasena, /static
-- Recuperacion de contrasena via SMTP (Gmail) con contrasena temporal
+- Contraseñas encriptadas con BCrypt (la API lo maneja vía parámetro camposEncriptar)
+- Secret key de Flask para encriptar cookies de sesión
+- Rutas públicas: /login, /logout, /recuperar-contrasena, /static
+- Recuperación de contraseña vía SMTP (Gmail) con contraseña temporal
+- Las facturas NO se borran físicamente. Se anulan (borrado lógico con campo estado: 'activa'/'anulada'). El borrado físico (DELETE) solo lo puede hacer el administrador
 
-PRINCIPIOS DE CODIGO:
-- Archivos en espanol (nombres de variables, comentarios, mensajes flash)
+PRINCIPIOS DE CÓDIGO:
+- Archivos en español (nombres de variables, comentarios, mensajes flash)
 - snake_case para variables y funciones Python
 - Cada Blueprint en su propio archivo dentro de routes/
 - Templates organizadas en templates/pages/, templates/layout/, templates/components/
 - Un solo archivo CSS personalizado en static/css/app.css
 - No usar JavaScript frameworks (React, Vue, etc). Solo Jinja2 server-side rendering
-- Los stored procedures se llaman via el metodo ejecutar_sp del ApiService
+- Los stored procedures se llaman vía el método ejecutar_sp del ApiService
 
 PRINCIPIOS DE TESTING:
 - Tests con pytest
-- Tests de integracion contra la API real (no mocks)
+- Tests de integración contra la API real (no mocks)
 - Cada Blueprint debe tener tests de sus rutas principales
 
-PRINCIPIOS DE DOCUMENTACION:
-- Docstrings en cada archivo Python explicando que hace y como se relaciona con otros archivos
+PRINCIPIOS DE DOCUMENTACIÓN:
+- Docstrings en cada archivo Python explicando qué hace y cómo se relaciona con otros archivos
 - Comentarios extensos tipo tutorial (el proyecto es educativo)
-- Diagramas Mermaid en documentacion Markdown
+- Diagramas Mermaid en documentación Markdown
 ```
 
-### Explicacion de cada principio
+### Explicación de cada principio
 
-| Principio | Por que se incluye |
+| Principio | Por qué se incluye |
 |-----------|-------------------|
 | Flask + Jinja2 + Bootstrap | Evita que la IA sugiera React, Vue, Django o FastAPI |
-| No ORM, todo via API REST | Evita que genere modelos SQLAlchemy o acceso directo a BD |
-| Blueprint por modulo | Define la estructura de carpetas que debe respetar |
-| Servicio generico centralizado | Evita que cree clientes HTTP diferentes en cada Blueprint |
-| Middleware con before_request | Define COMO se implementa la seguridad (no con decoradores por ruta) |
-| BCrypt via API (camposEncriptar) | Aclara que el frontend NO encripta, delega a la API |
-| Espanol en codigo | Evita que genere variables en ingles |
+| No ORM, todo vía API REST | Evita que genere modelos SQLAlchemy o acceso directo a BD |
+| Blueprint por módulo | Define la estructura de carpetas que debe respetar |
+| Servicio genérico centralizado | Evita que cree clientes HTTP diferentes en cada Blueprint |
+| Middleware con before_request | Define CÓMO se implementa la seguridad (no con decoradores por ruta) |
+| BCrypt vía API (camposEncriptar) | Aclara que el frontend NO encripta, delega a la API |
+| Español en código | Evita que genere variables en inglés |
 | No JavaScript frameworks | Evita que sugiera SPA o frontend separado |
 | Tests contra API real | Evita mocks que no reflejan el comportamiento real |
-| Estilo tutorial | El codigo es educativo, los comentarios son extensos a proposito |
+| Estilo tutorial | El código es educativo, los comentarios son extensos a propósito |
 
 ---
 
@@ -637,82 +638,83 @@ Repositorio de la API: https://github.com/ccastro2050/ApiGenericaCsharp
 
 FUNCIONALIDADES DEL SISTEMA:
 
-1. AUTENTICACION Y SEGURIDAD
-   - Login con email y contrasena (POST a /api/autenticacion/token)
+1. AUTENTICACIÓN Y SEGURIDAD
+   - Login con email y contraseña (POST a /api/autenticacion/token)
    - La API valida credenciales con BCrypt y retorna JWT
    - Almacenar token JWT en session de Flask
-   - Logout (limpiar sesion)
-   - Cambiar contrasena (verificar actual, validar nueva, encriptar con BCrypt via API)
-   - Recuperar contrasena olvidada (generar temporal, enviar por SMTP Gmail, forzar cambio al login)
-   - Validacion de contrasena: minimo 6 caracteres, 1 mayuscula, 1 numero, no trivial
+   - Logout (limpiar sesión)
+   - Cambiar contraseña (verificar actual, validar nueva, encriptar con BCrypt vía API)
+   - Recuperar contraseña olvidada (generar temporal, enviar por SMTP Gmail, forzar cambio al login)
+   - Validación de contraseña: mínimo 6 caracteres, 1 mayúscula, 1 número, no trivial
 
 2. CONTROL DE ACCESO RBAC
    - Al hacer login, consultar roles del usuario (tabla rol_usuario → rol)
    - Al hacer login, consultar rutas permitidas por rol (tabla rutarol → ruta)
    - Middleware @app.before_request verifica en cada request:
-     a) Si es ruta publica (/login, /static) → dejar pasar
-     b) Si no hay sesion → redirigir a /login
-     c) Si debe cambiar contrasena → redirigir a /cambiar-contrasena
-     d) Si la ruta no esta en rutas_permitidas → mostrar pagina 403
-   - Menu de navegacion dinamico: solo muestra las rutas permitidas para el usuario
-   - La consulta de roles y rutas se hace con UNA sola consulta SQL via ConsultasController
+     a) Si es ruta pública (/login, /static) → dejar pasar
+     b) Si no hay sesión → redirigir a /login
+     c) Si debe cambiar contraseña → redirigir a /cambiar-contrasena
+     d) Si la ruta no está en rutas_permitidas → mostrar página 403
+   - Menú de navegación dinámico: solo muestra las rutas permitidas para el usuario
+   - La consulta de roles y rutas se hace con UNA sola consulta SQL vía ConsultasController
      (JOIN de 5 tablas: usuario → rol_usuario → rol → rutarol → ruta)
-   - Fallback: si ConsultasController falla, usar 5 GETs separados al CRUD generico
+   - Fallback: si ConsultasController falla, usar 5 GETs separados al CRUD genérico
 
-3. CRUDS SIMPLES (7 modulos)
-   Cada modulo tiene: listado con tabla, formulario crear, formulario editar, eliminar con confirmacion.
-   Todos usan el ApiService generico (mismos 4 metodos: listar, crear, actualizar, eliminar).
+3. CRUDS SIMPLES (7 módulos)
+   Cada módulo tiene: listado con tabla, formulario crear, formulario editar, eliminar con confirmación.
+   Todos usan el ApiService genérico (mismos 4 métodos: listar, crear, actualizar, eliminar).
    - Producto: codigo (PK), nombre, stock, valorunitario
    - Persona: codigo (PK), nombre, email, telefono
    - Empresa: codigo (PK), nombre
    - Cliente: id (PK auto), credito, fkcodpersona (FK→persona), fkcodempresa (FK→empresa)
-   - Vendedor: id (PK auto), carnet, direccion, fkcodpersona (FK→persona)
+   - Vendedor: id (PK auto), carnet, dirección, fkcodpersona (FK→persona)
    - Rol: id (PK auto), nombre
-   - Ruta: id (PK auto), ruta, descripcion
+   - Ruta: id (PK auto), ruta, descripción
 
-4. GESTION DE USUARIOS CON ROLES (via Stored Procedures)
+4. GESTIÓN DE USUARIOS CON ROLES (vía Stored Procedures)
    - Listar usuarios con sus roles (SP: listar_usuarios_con_roles)
-   - Crear usuario con roles (SP: crear_usuario_con_roles) - contrasena se encripta con BCrypt
+   - Crear usuario con roles (SP: crear_usuario_con_roles) - contraseña se encripta con BCrypt
    - Actualizar usuario con roles (SP: actualizar_usuario_con_roles)
    - Eliminar usuario con roles (SP: eliminar_usuario_con_roles)
    - Consultar un usuario con roles (SP: consultar_usuario_con_roles)
-   - Actualizar solo roles sin tocar contrasena (SP: actualizar_roles_usuario)
+   - Actualizar solo roles sin tocar contraseña (SP: actualizar_roles_usuario)
 
-5. GESTION DE PERMISOS RBAC (via Stored Procedures)
+5. GESTIÓN DE PERMISOS RBAC (vía Stored Procedures)
    - Listar permisos ruta-rol (SP: listar_rutarol)
    - Crear permiso ruta-rol (SP: crear_rutarol)
    - Eliminar permiso ruta-rol (SP: eliminar_rutarol)
    - Verificar acceso de usuario a ruta (SP: verificar_acceso_ruta)
 
-6. FACTURAS MAESTRO-DETALLE (via Stored Procedures)
+6. FACTURAS MAESTRO-DETALLE (vía Stored Procedures)
    - Listar todas las facturas con productos, cliente y vendedor (SP: sp_listar_facturas_y_productosporfactura)
    - Consultar una factura con detalle (SP: sp_consultar_factura_y_productosporfactura)
    - Crear factura: seleccionar cliente, vendedor, agregar N productos con cantidad (SP: sp_insertar_factura_y_productosporfactura)
    - Actualizar factura: cambiar cliente/vendedor, reemplazar productos (SP: sp_actualizar_factura_y_productosporfactura)
-   - Eliminar factura con cascada (SP: sp_borrar_factura_y_productosporfactura)
-   - Los triggers de la BD calculan subtotales, totales y ajustan stock automaticamente
+   - Anular factura — borrado lógico (SP: sp_anular_factura) - cambia estado a 'anulada' y restaura stock
+   - Eliminar factura — borrado físico, solo admin (SP: sp_borrar_factura_y_productosporfactura)
+   - Los triggers de la BD calculan subtotales, totales y ajustan stock automáticamente
 
-7. LAYOUT Y NAVEGACION
+7. LAYOUT Y NAVEGACIÓN
    - Template base (base.html) con Bootstrap 5 sidebar layout
-   - Barra superior con nombre de usuario y boton logout
-   - Menu lateral (nav_menu.html) con links condicionales segun rutas_permitidas
+   - Barra superior con nombre de usuario y botón logout
+   - Menú lateral (nav_menu.html) con links condicionales según rutas_permitidas
    - Sistema de mensajes flash (alertas Bootstrap dismissible)
    - CSS personalizado en static/css/app.css
 
-FLUJOS DE USUARIO CRITICOS:
+FLUJOS DE USUARIO CRÍTICOS:
 - Login → cargar roles/rutas → redirigir a home
 - Crear factura → seleccionar cliente y vendedor → agregar productos → enviar SP
-- Recuperar contrasena → generar temporal → enviar email SMTP → forzar cambio al login
-- Navegacion RBAC → middleware verifica permisos → mostrar/ocultar menu segun rol
+- Recuperar contraseña → generar temporal → enviar email SMTP → forzar cambio al login
+- Navegación RBAC → middleware verifica permisos → mostrar/ocultar menú según rol
 ```
 
-### Desglose del prompt por seccion
+### Desglose del prompt por sección
 
-| Seccion | Que cubre | Por que es importante |
+| Sección | Qué cubre | Por qué es importante |
 |---------|-----------|----------------------|
-| Autenticacion | Login, logout, cambio, recuperacion | Es el flujo mas complejo del frontend |
-| RBAC | Roles, rutas, middleware, menu dinamico | Define la seguridad de toda la app |
-| CRUDs simples | 7 modulos identicos con CRUD generico | Son el 70% del proyecto pero el patron es el mismo |
+| Autenticación | Login, logout, cambio, recuperación | Es el flujo más complejo del frontend |
+| RBAC | Roles, rutas, middleware, menú dinámico | Define la seguridad de toda la app |
+| CRUDs simples | 7 módulos idénticos con CRUD genérico | Son el 70% del proyecto pero el patrón es el mismo |
 | Usuarios con roles | 6 SPs de usuario | Mezcla CRUD + stored procedures |
 | Permisos | 4 SPs de rutarol | Administracion del RBAC |
 | Facturas | 5 SPs maestro-detalle | El modulo mas complejo (formulario dinamico) |
