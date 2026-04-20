@@ -273,8 +273,79 @@ git clone https://github.com/ccastro2050/ApiGenericaCsharp.git
 
 # Entrar a la carpeta
 cd ApiGenericaCsharp
+```
 
-# Ejecutar la API (necesita .NET 9 instalado)
+### Crear la base de datos
+
+La API necesita una base de datos para funcionar. Sin ella, la API arranca pero todos los endpoints dan error porque no hay tablas, datos ni stored procedures.
+
+> **Que base de datos usar:** La API soporta 3 motores. Elige el que tengas instalado:
+>
+> | Motor | Cuando usarlo |
+> |-------|--------------|
+> | **SQL Server** | Si tienes SQL Server o SQL Server Express instalado (viene con Visual Studio) |
+> | **PostgreSQL** | Si prefieres un motor open-source robusto |
+> | **MySQL/MariaDB** | Si tienes XAMPP, Laragon o MariaDB instalado |
+
+Los scripts de creacion de la base de datos estan dentro de la API, en la carpeta `script_bd/`:
+
+```
+ApiGenericaCsharp/
+└── script_bd/
+    ├── bdfacturas_sqlserver.sql       # Para SQL Server
+    ├── bdfacturas_postgres.sql        # Para PostgreSQL
+    └── bdfacturas_mysql_mariadb.sql   # Para MySQL/MariaDB
+```
+
+**Paso 1 — Ejecutar el script segun tu motor de base de datos:**
+
+Para **SQL Server** (desde SQL Server Management Studio o sqlcmd):
+```bash
+# Primero crear la base de datos manualmente:
+# CREATE DATABASE bdfacturas_sqlserver_local;
+# Luego ejecutar el script:
+sqlcmd -S localhost -d bdfacturas_sqlserver_local -i script_bd/bdfacturas_sqlserver.sql
+```
+
+Para **PostgreSQL** (desde psql o pgAdmin):
+```bash
+# Primero crear la base de datos:
+# CREATE DATABASE bdfacturas_postgres_local;
+# Luego ejecutar el script:
+psql -U postgres -d bdfacturas_postgres_local -f script_bd/bdfacturas_postgres.sql
+```
+
+Para **MySQL/MariaDB** (desde la terminal o phpMyAdmin):
+```bash
+# El script crea la base de datos automaticamente
+mysql -u root < script_bd/bdfacturas_mysql_mariadb.sql
+```
+
+> **Que crea el script:** 12 tablas, 6 triggers, 15 stored procedures y datos de ejemplo (empresas, personas, productos, usuarios con roles, facturas con detalle). Todo listo para usar.
+
+**Paso 2 — Configurar la API para usar tu base de datos:**
+
+Abre el archivo `appsettings.json` dentro de la carpeta `ApiGenericaCsharp` con tu editor y verifica dos cosas:
+
+1. Que la **connection string** de tu motor tenga los datos correctos (servidor, usuario, contrasena)
+2. Que el campo `"DatabaseProvider"` apunte a tu motor:
+
+```json
+{
+  "DatabaseProvider": "SqlServer"
+}
+```
+
+| Valor de DatabaseProvider | Motor |
+|--------------------------|-------|
+| `"SqlServer"` | SQL Server |
+| `"Postgres"` | PostgreSQL |
+| `"MariaDB"` | MySQL/MariaDB |
+
+### Ejecutar la API
+
+```bash
+# Desde la carpeta ApiGenericaCsharp
 dotnet run
 ```
 
@@ -289,6 +360,24 @@ http://localhost:5035/swagger
 Deberias ver la documentacion Swagger de la API. Si la ves, la API esta lista.
 
 > **Que es Swagger:** Es una pagina web automatica que muestra todos los "endpoints" (URLs) que la API ofrece. Es como el menu de un restaurante — te dice que puedes pedir.
+
+**Verificar que la base de datos funciona:**
+
+En el navegador, visita tambien:
+
+```
+http://localhost:5035/api/diagnostico/conexion
+```
+
+Debe responder con informacion de la base de datos (servidor, version, estado). Si da error, revisa la connection string en `appsettings.json`.
+
+Tambien puedes probar:
+
+```
+http://localhost:5035/api/producto
+```
+
+Debe retornar una lista de productos en JSON. Si la ves, la base de datos esta funcionando correctamente.
 
 ### Crear la carpeta del proyecto
 
@@ -375,15 +464,21 @@ pip freeze > requirements.txt
 
 ### Agregar venv al .gitignore
 
-La carpeta `venv/` pesa mucho y no se debe subir a GitHub. Creemos un archivo `.gitignore` para excluirla:
-
-```bash
-echo "venv/" > .gitignore
-echo "__pycache__/" >> .gitignore
-echo "*.pyc" >> .gitignore
-```
+La carpeta `venv/` pesa mucho y no se debe subir a GitHub. Crea un archivo `.gitignore` para excluirla.
 
 > **Que es .gitignore:** Le dice a Git cuales archivos NO debe incluir en el repositorio. El venv y los archivos de cache de Python no se suben porque son locales de cada maquina.
+
+Abre tu editor (VS Code) y crea un archivo nuevo llamado `.gitignore` en la raiz de `FrontFlaskSDD/`. Escribe dentro:
+
+```
+venv/
+__pycache__/
+*.pyc
+```
+
+Guarda el archivo.
+
+> **Nota:** El nombre del archivo es exactamente `.gitignore` (con el punto al inicio, sin extension). En VS Code: File → New File → escribir `.gitignore` → guardar.
 
 ### Verificar el estado final de la preparacion
 
@@ -399,19 +494,26 @@ FrontFlaskSDD/
 └── 03_Tutorial_SDD_Paso_a_Paso.md    # Este tutorial
 ```
 
-Verifica con:
+Verifica abriendo la carpeta `FrontFlaskSDD` en el explorador de archivos o en la terminal:
 
-```bash
+```powershell
+# En PowerShell:
+dir
+
+# En CMD o Git Bash:
 ls -la
-# Debes ver: .gitignore, requirements.txt, venv/, y los archivos .md
 ```
+
+Debes ver: `.gitignore`, `requirements.txt`, `venv/` y los archivos `.md`.
 
 ### Competencias adquiridas en esta seccion
 
 - [x] Saber instalar herramientas de desarrollo
 - [x] Verificar que una instalacion funciona desde la terminal
 - [x] Clonar un repositorio de GitHub
-- [x] Arrancar una API y verificar que responde
+- [x] Crear una base de datos y ejecutar scripts SQL
+- [x] Configurar una API para conectarse a la base de datos
+- [x] Arrancar una API y verificar que responde (Swagger + datos reales)
 - [x] Crear y activar un entorno virtual de Python (venv)
 - [x] Instalar librerias con pip y generar requirements.txt
 - [x] Configurar .gitignore para excluir archivos innecesarios
@@ -1406,13 +1508,10 @@ graph TB
 # 1. Verificar que el venv esta activo (debes ver "(venv)" en tu terminal)
 # Si no esta activo: venv\Scripts\activate (Windows) o source venv/bin/activate (Mac/Linux)
 
-# 2. Si /implement actualizo el requirements.txt, reinstalar dependencias
-pip install -r requirements.txt
-
-# 3. Arrancar Flask
+# 2. Arrancar Flask
 python app.py
 
-# 4. Abrir navegador en http://localhost:5300
+# 3. Abrir navegador en http://localhost:5300
 # Deberias ver la pagina base (aunque vacia)
 ```
 
